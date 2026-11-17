@@ -365,14 +365,14 @@ html[data-lang="hi"] .hero-copy h1{font-size:clamp(2.4rem,5.6vw,4.5rem);line-hei
 }
 @keyframes fingerLift{
   0%{transform:translate(-50%,0) rotate(0deg)}
-  22%,58%{transform:translate(-50%,-38px) rotate(-6deg)}
-  78%,100%{transform:translate(-50%,0) rotate(0deg)}
+  10%,72%{transform:translate(-50%,-38px) rotate(-6deg)}
+  90%,100%{transform:translate(-50%,0) rotate(0deg)}
 }
 @keyframes fingerPress{
   0%,100%{transform:translate(-50%,0) scaleY(1)}
   38%{transform:translate(-50%,6px) scaleY(.86)}
 }
-.art-finger.is-lift{animation:fingerLift 2.9s var(--ease) both}
+.art-finger.is-lift{animation:fingerLift 4.8s var(--ease) both}
 .art-finger.is-press{animation:fingerPress 1.7s var(--ease) both}
 .art-word.is-fly{color:var(--ink)}
 .art-word.is-stay{color:var(--ink-2)}
