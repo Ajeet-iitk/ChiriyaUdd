@@ -876,6 +876,22 @@ html[data-lang="hi"] .call-word{font-family:var(--font-hi);line-height:1.22;lett
 .palm-ripples.go i:nth-child(3){animation-delay:.32s}
 @keyframes ripple{0%{opacity:.6;transform:scale(.92)}100%{opacity:0;transform:scale(1.5)}}
 .palm-help{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);text-align:center}
+html[data-theme="light"] .palm-disc{
+  background:
+    radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--ember) 19%,transparent),transparent 62%),
+    radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--bg-3) 92%,transparent),transparent 75%);
+  border-color:color-mix(in srgb,var(--marigold) 44%,transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 28px 60px -38px rgba(107,60,28,.42),
+    0 0 55px -26px var(--glow);
+}
+html[data-theme="light"] .palm-disc::after{border-color:color-mix(in srgb,var(--marigold) 30%,transparent)}
+html[data-theme="light"] .palm-disc .palm-lines{opacity:.78}
+html[data-theme="light"] .palm-disc .palm-lines svg{stroke:color-mix(in srgb,var(--ember) 36%,transparent)}
+html[data-theme="light"] .palm-hint{color:var(--ink-2)}
+html[data-theme="light"] .palm-help{color:var(--muted)}
+html[data-theme="light"] .play-sun{background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--sun) 26%,transparent),transparent 66%)}
 
 /* friendly whacks */
 .whacks{position:absolute;inset:-30%;pointer-events:none}
