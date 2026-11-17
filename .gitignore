@@ -1,0 +1,15 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Brief for the build
+Instructions.md
+
+# Local tooling
+node_modules/
+.vscode/
+.idea/
+
+# Logs
+*.log

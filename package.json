@@ -1,0 +1,13 @@
+{
+  "name": "chiriya-udd",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Chiriya Udd — the courtyard game of flying names. A hand-built browser game with procedural music and a trilingual almanac.",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python -m http.server 8000"
+  },
+  "keywords": ["game", "browser-game", "vanilla-javascript", "hindi", "web-audio"],
+  "license": "MIT"
+}
