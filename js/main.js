@@ -9,6 +9,8 @@ import { Sound } from "./audio.js";
 import { Scene } from "./scene.js";
 import { Game } from "./play.js";
 import { store } from "./store.js";
+import { mountHand } from "./hand.js";
+import { Vision, visualKey } from "./vision.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -31,8 +33,13 @@ $("#musicBtn")?.setAttribute("aria-pressed", String(!!store.get("sound") && !!st
 $("#soundBtn")?.setAttribute("aria-pressed", String(!!store.get("sound")));
 
 /* ---------- theme ---------- */
+let fadeTimer = null;
 function applyTheme(theme){
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.classList.add("theme-fading");
+  clearTimeout(fadeTimer);
+  fadeTimer = setTimeout(() => root.classList.remove("theme-fading"), 1000);
+  root.dataset.theme = theme;
   store.set("theme", theme);
   const meta = $('meta[name="theme-color"]');
   if(meta) meta.content = theme === "dark" ? "#0a0911" : "#faf4e9";
@@ -54,7 +61,7 @@ function applyLang(lang, persist = true){
   renderAlmanacDemo();
   renderRuleCopy();
   updateArt();
-  if(!$("#view-play").hidden && game.phase === "intro") game.open(game.mode);
+  if(!$("#view-play").hidden) game.refreshIntro();
 }
 
 /* ---------- home: scrolling word ribbon ---------- */
@@ -72,15 +79,15 @@ function renderRibbon(){
 let artTimer = null;
 const artWord = $("#artWord");
 const artSub = $("#artSub");
-const artFinger = $("#artFinger");
+const artHand = $("#artHand");
 function updateArt(){
   if(!artWord) return;
   const w = WORDS[Math.floor(Math.random() * WORDS.length)];
   artWord.style.opacity = "0";
-  if(artFinger){
-    artFinger.classList.remove("is-lift", "is-press");
-    void artFinger.offsetWidth;
-    artFinger.classList.add(w.flies ? "is-lift" : "is-press");
+  if(artHand){
+    artHand.classList.remove("is-lift", "is-press");
+    void artHand.offsetWidth;
+    artHand.classList.add(w.flies ? "is-lift" : "is-press");
   }
   setTimeout(() => {
     artWord.textContent = w[i18n.lang] || w.en;
@@ -324,6 +331,25 @@ function startViz(){
   draw();
 }
 
+/* ---------- explore: 3D vision demo ---------- */
+let demoVision = null;
+function startVisionDemo(){
+  const canvas = $("#visionDemo");
+  if(!canvas) return;
+  demoVision = new Vision(canvas, { rate: 0.7, angle: 0.9 });
+  const pool = shuffle(WORDS.slice())
+    .filter((w, i, arr) => arr.findIndex(x => visualKey(x) === visualKey(w)) === i)
+    .slice(0, 14);
+  let i = 0;
+  const step = () => {
+    if(!pool.length) return;
+    demoVision.show(pool[i % pool.length]);
+    i++;
+  };
+  step();
+  setInterval(() => { if(!$("#view-explore").hidden) step(); }, 3600);
+}
+
 /* ---------- sound controls ---------- */
 function applySound(){
   const s = !!store.get("sound");
@@ -369,9 +395,12 @@ function showToast(text){
 
 /* ---------- routing ---------- */
 const VIEWS = ["home", "explore", "almanac", "how"];
+const MODE_IDS = ["classic", "sprint", "zen", "maya"];
 function route(){
   const raw = decodeURIComponent(location.hash.replace(/^#\/?/, "")) || "home";
-  const name = raw === "play" ? "play" : (VIEWS.includes(raw) ? raw : "home");
+  const [head, sub] = raw.split("/");
+  const name = head === "play" ? "play" : (VIEWS.includes(head) ? head : "home");
+  const submode = name === "play" && MODE_IDS.includes(sub) ? sub : null;
   const playing = name === "play";
 
   document.body.classList.toggle("is-playing", playing);
@@ -386,8 +415,15 @@ function route(){
 
   $$(".nav a").forEach(a => a.classList.toggle("is-active", a.dataset.nav === name));
 
+  if(demoVision){
+    if(name === "explore") demoVision.resume();
+    else demoVision.pause();
+  }
+
   if(playing){
-    if(game.phase === "idle") game.open(store.get("mode") || "classic");
+    if(game.phase === "idle") game.open(submode);
+    else if(submode && game.mode !== submode) game.open(submode);
+    else if(!submode && (game.phase === "intro" || game.phase === "pick")) game.showPicker();
   }else if(game.phase !== "idle"){
     game.stop();
   }
@@ -415,11 +451,14 @@ function refreshBests(){
 function init(){
   applyTheme(store.get("theme") || "dark");
   applyLang(store.get("lang") || "en", false);
+  mountHand($("#artHand"), "hero");
+  mountHand($("#ruleHand"), "rule");
   seedHeroBirds();
   startArtCycle();
   buildKeys();
   bindRuleDemo();
   startViz();
+  startVisionDemo();
   refreshBests();
   $("#year").textContent = new Date().getFullYear();
   $("#factWords").textContent = WORD_COUNT;
@@ -443,8 +482,9 @@ function init(){
   // modes
   $$("[data-play-mode]").forEach(btn => {
     btn.addEventListener("click", () => {
-      store.set("mode", btn.dataset.playMode);
-      location.hash = "#play";
+      const mode = btn.dataset.playMode;
+      store.set("mode", mode);
+      location.hash = `#play/${mode}`;
     });
   });
 
@@ -507,9 +547,6 @@ function init(){
   window.addEventListener("hashchange", route);
   if(!location.hash) history.replaceState(null, "", "#home");
   route();
-
-  // make sure a deep link to #play gets its intro sheet
-  setTimeout(() => { if(location.hash === "#play" && game.phase === "idle") game.open(store.get("mode") || "classic"); }, 30);
 }
 
 init();

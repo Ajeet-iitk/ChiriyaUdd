@@ -1,10 +1,13 @@
 /* ==========================================================================
    The baithak — game state, the finger rule, scoring, and the friendly thwacks.
    One rule: hold the palm; lift only when it flies.
+   Maya adds a 3D vision that sometimes lies on purpose.
    ========================================================================== */
 
 import { WORDS, makeBag } from "./words.js";
 import { store } from "./store.js";
+import { slipHand, mountHand } from "./hand.js";
+import { Vision, visualKey } from "./vision.js";
 
 const $ = (id) => document.getElementById(id);
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
@@ -13,7 +16,10 @@ const MODES = {
   classic: { nameKey: "modeClassic", descKey: "modeIntroClassic", lives: 3 },
   sprint: { nameKey: "modeSprint", descKey: "modeIntroSprint", lives: 0 },
   zen: { nameKey: "modeZen", descKey: "modeIntroZen", lives: 0 },
+  maya: { nameKey: "modeMaya", descKey: "modeIntroMaya", lives: 3 },
 };
+
+const TRICK_CHANCE = 0.38;
 
 export class Game {
   constructor({ sound, scene, i18n }){
@@ -27,13 +33,16 @@ export class Game {
       layer: $("view-play"),
       call: $("call"), word: $("callWord"), sub: $("callSub"), kicker: $("callKicker"),
       verdict: $("callVerdict"), meter: $("callMeter"), flock: $("callFlock"),
-      palm: $("palmDisc"), palmShell: $("palmShell"), palmHint: $("palmHint"),
+      palm: $("palmDisc"), palmShell: $("palmShell"), palmHint: $("palmHint"), hand: $("palmHand"),
       ripples: document.querySelector(".palm-ripples"), whacks: $("whacks"),
       score: $("hudScore"), streak: $("hudStreak"), lives: $("hudLives"),
       time: $("hudTime"), speed: $("speedBar"), toast: $("playToast"),
+      pick: $("playPick"), pickBack: $("pickBack"),
       intro: $("playIntro"), pause: $("playPause"), over: $("playOver"),
       countdown: $("countdown"), countNum: $("countNum"),
+      visionStage: $("visionStage"), visionCaption: $("visionCaption"),
       introKicker: $("introKicker"), introTitle: $("introTitle"), introDesc: $("introDesc"),
+      introVisionStep: $("introVisionStep"), introModes: $("introModes"),
       overKicker: $("overKicker"), overTitle: $("overTitle"), overVerdict: $("overVerdict"),
       overScore: $("overScore"), overBest: $("overBest"), overAcc: $("overAcc"),
       overStreak: $("overStreak"), overMisses: $("overMisses"),
@@ -43,8 +52,11 @@ export class Game {
       musicVol: $("musicVol"), sfxVol: $("sfxVol"),
     };
 
+    mountHand(this.el.hand, "palm");
+    this.vision = new Vision($("visionCanvas"), { rate: 0.58 });
+
     this.phase = "idle";
-    this.mode = store.get("mode") || "classic";
+    this.mode = MODES[store.get("mode")] ? store.get("mode") : "classic";
     this.fingerDown = false;
     this.bag = makeBag();
     this.recent = [];
@@ -57,7 +69,7 @@ export class Game {
     this.wrong = 0;
     this.calls = 0;
     this.timeLeft = 45;
-    this.windowMs = 1700;
+    this.windowMs = 1380;
     this.callStart = 0;
     this.judgedAt = 0;
     this.nextAt = 0;
@@ -71,6 +83,7 @@ export class Game {
     this._lastFrame = performance.now();
     this._shownTime = 45;
     this._pointerId = null;
+    this._vision = null;
 
     this._bind();
     this._tick = this._frame.bind(this);
@@ -89,7 +102,19 @@ export class Game {
     el.restartBtn.addEventListener("click", () => { this.sound.fx("ui"); this.begin(); });
     el.quitBtn.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
     el.againBtn.addEventListener("click", () => { this.sound.fx("ui"); this.begin(); });
-    el.overModes.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
+    el.overModes.addEventListener("click", () => { this.sound.fx("ui"); this.showPicker(); });
+    el.introModes.addEventListener("click", () => { this.sound.fx("ui"); this.showPicker(); });
+    el.pickBack.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
+
+    const grid = $("pickGrid");
+    if(grid){
+      grid.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-pick-mode]");
+        if(!btn) return;
+        this.sound.fx("ui");
+        this.chooseMode(btn.dataset.pickMode);
+      });
+    }
 
     el.musicVol.value = Math.round((store.get("musicVol") ?? 0.38) * 100);
     el.sfxVol.value = Math.round((store.get("sfxVol") ?? 0.72) * 100);
@@ -130,7 +155,7 @@ export class Game {
         const onControl = e.target.closest && e.target.closest("button, a, [role=button]");
         const playing = this.phase === "call" || this.phase === "settle" || this.phase === "judged";
         if(onControl && !playing) return;
-        if(this.phase === "paused" || this.phase === "intro" || this.phase === "over") return;
+        if(this.phase === "paused" || this.phase === "intro" || this.phase === "over" || this.phase === "pick") return;
         e.preventDefault();
         if(!e.repeat){
           this._pointerId = null;
@@ -141,6 +166,7 @@ export class Game {
         if(this.phase === "paused") this.resume();
         else if(this.phase === "call" || this.phase === "settle" || this.phase === "judged") this.pause();
         else if(this.phase === "intro" || this.phase === "over") this.exit();
+        else if(this.phase === "pick") this.exit();
       }
     });
     window.addEventListener("keyup", (e) => {
@@ -159,11 +185,52 @@ export class Game {
   }
 
   /* -------------------------------------------------------------- lifecycle */
-  open(mode){
-    if(MODES[mode]) this.mode = mode;
-    store.set("mode", this.mode);
+  open(mode = null){
     this.el.layer.hidden = false;
+    if(mode && MODES[mode]){
+      this.mode = mode;
+      store.set("mode", this.mode);
+      this.showIntro();
+    }else{
+      this.showPicker();
+    }
+  }
+
+  showPicker(){
+    this._run++;
+    clearTimeout(this._countTimer);
+    clearTimeout(this._toastTimer);
+    this.phase = "pick";
+    this.fingerDown = false;
+    this._pointerId = null;
+    this._vision = null;
+    this.vision.hide();
+    this.el.layer.hidden = false;
+    this.el.layer.classList.remove("is-maya");
+    this.el.pick.hidden = false;
+    this.el.intro.hidden = true;
+    this.el.pause.hidden = true;
+    this.el.over.hidden = true;
+    this.el.countdown.hidden = true;
+    this.el.palm.classList.remove("is-down", "is-up");
+    this.el.toast.classList.remove("show");
+    this.el.visionStage.hidden = true;
+    this.el.call.classList.remove("is-fly", "is-stay", "is-miss", "is-calling", "is-past");
+    this.sound.duck(false);
+    if(typeof this.onBest === "function") this.onBest();
+  }
+
+  chooseMode(mode){
+    if(!MODES[mode]) return;
+    this.mode = mode;
+    store.set("mode", mode);
+    this.el.pick.hidden = true;
+    this.showIntro();
+  }
+
+  showIntro(){
     this.reset();
+    this.el.layer.hidden = false;
     this.phase = "intro";
     this.hideOverlays();
     this.el.intro.hidden = false;
@@ -171,10 +238,26 @@ export class Game {
     this.el.introKicker.querySelector("[data-i18n]").textContent = this.i18n.t("getReady");
     this.el.introTitle.textContent = this.i18n.t(MODES[this.mode].nameKey);
     this.el.introDesc.textContent = this.i18n.t(MODES[this.mode].descKey);
+    this.el.introVisionStep.hidden = this.mode !== "maya";
     this.el.word.textContent = "चिड़िया";
     this.el.sub.textContent = "chidiya";
     this.el.kicker.firstElementChild.textContent = "";
     this.el.palmHint.textContent = this.i18n.t("getReady");
+    if(this.mode === "maya"){
+      this.el.visionStage.hidden = false;
+      this.el.visionStage.classList.remove("is-trick", "is-true", "is-verdict");
+      this.el.visionCaption.textContent = "";
+      this.vision.show(WORDS.find(x => x.id === "chidiya") || WORDS[0]);
+    }
+  }
+
+  /** Re-render the intro sheet after a language switch. */
+  refreshIntro(){
+    if(this.phase === "intro") this.showIntro();
+    else if(this.phase === "pick"){
+      this.el.pick.hidden = false;
+      if(typeof this.onBest === "function") this.onBest();
+    }
   }
 
   begin(){
@@ -206,9 +289,14 @@ export class Game {
     clearTimeout(this._toastTimer);
     this.phase = "idle";
     this.fingerDown = false;
+    this._pointerId = null;
+    this._vision = null;
+    this.vision.hide();
     this.el.layer.hidden = true;
+    this.el.layer.classList.remove("is-maya");
     this.el.palm.classList.remove("is-down", "is-up");
     this.el.toast.classList.remove("show");
+    this.el.visionStage.hidden = true;
     this.hideOverlays();
     this.el.countdown.hidden = true;
     this.sound.duck(false);
@@ -224,7 +312,7 @@ export class Game {
     this.calls = 0;
     this.timeLeft = 45;
     this._shownTime = 45;
-    this.windowMs = 1700;
+    this.windowMs = 1380;
     this.callStart = 0;
     this.judgedAt = 0;
     this.nextAt = 0;
@@ -236,6 +324,12 @@ export class Game {
     this.firstWord = true;
     this.word = null;
     this.fingerDown = false;
+    this._vision = null;
+    this.vision.hide();
+    this.el.layer.classList.toggle("is-maya", this.mode === "maya");
+    this.el.visionStage.hidden = this.mode !== "maya";
+    this.el.visionStage.classList.remove("is-trick", "is-true", "is-verdict");
+    this.el.visionCaption.textContent = "";
     this.el.meter.style.transform = "scaleX(1)";
     this.el.meter.classList.remove("warn");
     this.el.whacks.replaceChildren();
@@ -251,7 +345,7 @@ export class Game {
     this.el.speed.style.width = "0%";
     this.updateHud(true);
     this.el.time.hidden = this.mode !== "sprint";
-    this.el.lives.hidden = this.mode !== "classic";
+    this.el.lives.hidden = !(this.mode === "classic" || this.mode === "maya");
   }
 
   countdown(){
@@ -290,8 +384,9 @@ export class Game {
 
   /* ---------------------------------------------------------------- round */
   startCall(){
-    if(this.phase === "over" || this.phase === "idle") return;
+    if(this.phase === "over" || this.phase === "idle" || this.phase === "pick") return;
     if(!this.fingerDown){ this.phase = "settle"; this.nextAt = 0; this.promptSettle(); return; }
+    const first = this.calls === 0;
     const w = this.firstWord ? (WORDS.find(x => x.id === "chidiya") || WORDS[0]) : this.bag.next(this.recent);
     this.firstWord = false;
     this.word = w;
@@ -302,6 +397,7 @@ export class Game {
     this.judgedAt = 0;
     this._lastMiss = false;
     this.recent = [w.id, ...this.recent].slice(0, 5);
+    this._vision = this.pickVision(w, first);
 
     this.el.call.classList.remove("is-fly", "is-stay", "is-miss", "is-past", "is-calling");
     void this.el.call.offsetWidth;
@@ -318,8 +414,31 @@ export class Game {
     this.el.palmHint.textContent = "";
     this.el.palmHint.classList.remove("is-alert");
     this.el.speed.style.width = `${this.speedLevel() * 11}%`;
+
+    if(this.mode === "maya" && this._vision){
+      this.el.visionStage.hidden = false;
+      this.el.visionStage.classList.remove("is-trick", "is-true", "is-verdict");
+      this.el.visionCaption.textContent = "";
+      this.vision.show(this._vision.word);
+      this.vision.react("");
+    }else{
+      this.el.visionStage.hidden = true;
+    }
+
     this.pulsePalm();
     this.sound.fx("tick");
+  }
+
+  /** Decide what the 3D vision shows: the truth, or a very convincing lie. */
+  pickVision(w, first){
+    if(this.mode !== "maya") return null;
+    if(first || Math.random() > TRICK_CHANCE) return { word: w, trick: false };
+    const key = visualKey(w);
+    const pool = WORDS.filter(x =>
+      x.id !== w.id && x.flies !== w.flies && visualKey(x) !== key
+    );
+    if(!pool.length) return { word: w, trick: false };
+    return { word: pool[Math.floor(Math.random() * pool.length)], trick: true };
   }
 
   secondary(w){
@@ -330,18 +449,19 @@ export class Game {
   }
 
   windowFor(){
-    if(this.mode === "zen") return 2200;
-    const base = this.mode === "sprint" ? 1520 : 1720;
-    const floor = this.mode === "sprint" ? 680 : 780;
-    return Math.max(floor, base - this.correct * 38);
+    if(this.mode === "zen") return 1900;
+    const base = this.mode === "sprint" ? 1180 : 1380;
+    const floor = this.mode === "sprint" ? 520 : 600;
+    return Math.max(floor, base - this.correct * 34);
   }
 
   speedLevel(){
-    return clamp(1 + Math.round((1720 - this.windowMs) / 130), 1, 9);
+    const base = this.mode === "sprint" ? 1180 : 1380;
+    return clamp(1 + Math.round((base - this.windowMs) / 105), 1, 9);
   }
 
   press(pointerId = null){
-    if(this.phase === "intro" || this.phase === "over" || this.phase === "idle" || this.phase === "paused") return;
+    if(this.phase === "intro" || this.phase === "over" || this.phase === "idle" || this.phase === "paused" || this.phase === "pick") return;
     if(this.fingerDown) return;
     this.fingerDown = true;
     this._pointerId = pointerId;
@@ -350,7 +470,7 @@ export class Game {
     this.el.palm.setAttribute("aria-pressed", "true");
     try{ navigator.vibrate && navigator.vibrate(8); }catch{}
     if(this.phase === "settle"){
-      this.nextAt = this.now() + 130;
+      this.nextAt = this.now() + 120;
       this.el.palmHint.textContent = this.i18n.t("holdPalm");
       this.el.palmHint.classList.remove("is-alert");
     }
@@ -383,22 +503,38 @@ export class Game {
   judge(hit){
     if(this.phase !== "call" || !this.word) return;
     const w = this.word;
+    const trick = !!(this._vision && this._vision.trick);
     this.phase = "judged";
     this.judgedAt = this.now();
     this._lastMiss = !hit;
     this.el.meter.classList.remove("warn");
     this.el.call.classList.remove("is-calling");
+    this.vision.react(hit ? "good" : "bad");
+
+    // the vision flips its caption, too late to help
+    if(this.mode === "maya" && this._vision){
+      this.el.visionStage.classList.add("is-verdict");
+      if(trick){
+        this.el.visionStage.classList.add("is-trick");
+        this.el.visionCaption.textContent = this.i18n.t("visionTrick", {
+          w: this._vision.word[this.i18n.lang] || this._vision.word.en,
+        });
+      }else{
+        this.el.visionStage.classList.add("is-true");
+        this.el.visionCaption.textContent = this.i18n.t("visionTrue");
+      }
+    }
 
     if(hit){
       this.correct++;
       this.streak++;
       this.bestStreak = Math.max(this.bestStreak, this.streak);
       const mult = 1 + Math.min(3, Math.floor((this.streak - 1) / 3) * 0.5);
-      const speedBonus = this.windowMs < 900 ? 50 : this.windowMs < 1200 ? 25 : 0;
+      const speedBonus = this.windowMs < 800 ? 50 : this.windowMs < 1050 ? 25 : 0;
       const points = Math.round((100 + speedBonus) * mult);
       this.score += points;
       this.el.call.classList.add(w.flies ? "is-fly" : "is-stay");
-      this.showVerdict(this.i18n.t(w.flies ? "verdictFly" : "verdictStay"), "good");
+      this.showVerdict(this.i18n.t(trick ? "verdictSight" : (w.flies ? "verdictFly" : "verdictStay")), "good");
       this.scorePop(points);
       if(w.flies){
         this.sound.fx("hitFly");
@@ -407,36 +543,58 @@ export class Game {
       }else{
         this.sound.fx("hitStay");
       }
-      if(this.streak === 5 || this.streak === 10 || this.streak === 15){
+      if(trick){
+        this.showToast(this.i18n.t("trickToast", {
+          w: w[this.i18n.lang] || w.en,
+          pic: this._vision.word[this.i18n.lang] || this._vision.word.en,
+        }), "good");
+      }else if(this.streak === 5 || this.streak === 10 || this.streak === 15){
         this.showToast(`${this.streak} ${this.i18n.lang === "hi" ? "लगातार!" : this.i18n.lang === "hl" ? "lagataar!" : "in a row."}`, "good");
       }
     }else{
       this.wrong++;
       this.streak = 0;
-      this.misses.unshift({ w, lifted: !w.flies });
-      if(this.mode === "classic") this.lives = Math.max(0, this.lives - 1);
+      this.misses.unshift({
+        w,
+        lifted: !w.flies,
+        pic: trick ? this._vision.word : null,
+      });
+      if(this.mode === "classic" || this.mode === "maya") this.lives = Math.max(0, this.lives - 1);
       if(this.mode === "sprint") this.timeLeft = Math.max(0, this.timeLeft - 2);
       this.el.call.classList.add("is-miss");
       this.showVerdict(this.i18n.t(w.flies ? "verdictMissFly" : "verdictMissStay"), "bad");
       this.sound.fx("miss");
       this.whack();
       this.shake();
-      const line = this.i18n.pick(this.i18n.raw(w.flies ? "missFly" : "missStay"));
-      this.showToast(line.replace("{w}", w[this.i18n.lang] || w.en), "bad");
+      slipHand(this.el.hand);
+      if(trick){
+        this.showToast(this.i18n.t("trickToast", {
+          w: w[this.i18n.lang] || w.en,
+          pic: this._vision.word[this.i18n.lang] || this._vision.word.en,
+        }), "bad");
+      }else{
+        const line = this.i18n.pick(this.i18n.raw(w.flies ? "missFly" : "missStay"));
+        this.showToast(line.replace("{w}", w[this.i18n.lang] || w.en), "bad");
+      }
     }
     this.updateHud();
   }
 
   endCall(){
     if(this.phase !== "judged") return;
-    if(this.mode === "classic" && this.lives <= 0) return this.finish();
+    if((this.mode === "classic" || this.mode === "maya") && this.lives <= 0) return this.finish();
     if(this.mode === "sprint" && this.timeLeft <= 0) return this.finish("time");
     this.phase = "settle";
     this.el.call.classList.remove("is-fly", "is-stay", "is-miss");
     this.el.verdict.className = "call-verdict";
     if(this.word) this.el.word.classList.add("is-past");
-    const gap = this.mode === "zen" ? 460 : 300;
+    if(this.mode === "maya"){
+      this.el.visionStage.hidden = true;
+      this.vision.hide();
+    }
+    const gap = this.mode === "zen" ? 380 : 240;
     this.nextAt = this.fingerDown ? this.now() + gap : 0;
+    this._vision = null;
     this.promptSettle();
   }
 
@@ -444,6 +602,8 @@ export class Game {
     this.phase = "over";
     this.sound.fx("over");
     this.sound.duck(true);
+    this.vision.hide();
+    this.el.visionStage.hidden = true;
     this.el.countdown.hidden = true;
     const total = this.correct + this.wrong;
     const acc = total ? this.correct / total : 0;
@@ -479,7 +639,9 @@ export class Game {
         name.textContent = m.w[this.i18n.lang] || m.w.en;
         const why = document.createElement("span");
         const note = m.w.note && m.w.note[this.i18n.lang];
-        why.textContent = note || this.i18n.t(m.w.flies ? "explainFly" : "explainStay");
+        let text = note || this.i18n.t(m.w.flies ? "explainFly" : "explainStay");
+        if(m.pic) text += ` · ${this.i18n.t("missPicture", { w: m.pic[this.i18n.lang] || m.pic.en })}`;
+        why.textContent = text;
         row.append(mark, name, why);
         box.append(row);
       });
@@ -501,6 +663,7 @@ export class Game {
     this._prevPhase = this.phase;
     this._pauseAt = performance.now();
     this.phase = "paused";
+    this.vision.pause();
     this.el.pause.hidden = false;
     this.sound.duck(true);
   }
@@ -508,6 +671,7 @@ export class Game {
     if(this.phase !== "paused") return;
     this._shift += performance.now() - this._pauseAt;
     this.phase = this._prevPhase || "settle";
+    this.vision.resume();
     this.el.pause.hidden = true;
     this.sound.duck(false);
   }
@@ -518,7 +682,7 @@ export class Game {
     if(this.el.layer.hidden) return;
     const dt = Math.min(0.12, (now - this._lastFrame) / 1000);
     this._lastFrame = now;
-    if(this.phase === "paused" || this.phase === "over" || this.phase === "intro" || this.phase === "idle" || this.phase === "count") return;
+    if(this.phase === "paused" || this.phase === "over" || this.phase === "intro" || this.phase === "idle" || this.phase === "count" || this.phase === "pick") return;
 
     const t = this.now();
 
@@ -542,7 +706,7 @@ export class Game {
         this.judge(this.word.flies ? false : true);
       }
     }else if(this.phase === "judged"){
-      const wait = this._lastMiss ? 600 : 430;
+      const wait = (this.mode === "maya" && this._vision?.trick) ? 760 : this._lastMiss ? 520 : 360;
       if(t - this.judgedAt >= wait) this.endCall();
     }else if(this.phase === "settle"){
       if(this.nextAt && t >= this.nextAt && this.fingerDown) this.startCall();
@@ -562,8 +726,9 @@ export class Game {
 
   renderLives(){
     const b = this.el.lives.querySelector("b");
-    const lost = (MODES[this.mode].lives || 0) - this.lives;
-    b.innerHTML = Array.from({ length: MODES[this.mode].lives || 0 }, (_, i) =>
+    const total = MODES[this.mode].lives || 0;
+    const lost = total - this.lives;
+    b.innerHTML = Array.from({ length: total }, (_, i) =>
       `<svg class="feather${i < lost ? " gone" : ""}" viewBox="0 0 24 24"><use href="#i-feather"/></svg>`
     ).join("");
   }
@@ -610,13 +775,13 @@ export class Game {
   whack(){
     const box = this.el.whacks;
     box.replaceChildren();
-    const angles = [-125, -45, 45, 125];
+    const angles = [-140, -70, 0, 70, 140];
     angles.forEach((a, i) => {
       const s = document.createElement("span");
       s.className = "whack";
       s.style.setProperty("--a", `${a}deg`);
       s.style.setProperty("--a2", `${(i % 2 ? -1 : 1) * 26}deg`);
-      s.style.setProperty("--wd", `${i * 0.055}s`);
+      s.style.setProperty("--wd", `${i * 0.05}s`);
       s.innerHTML = `<svg viewBox="0 0 24 24"><use href="#i-hand"/></svg>`;
       box.append(s);
       requestAnimationFrame(() => s.classList.add("go"));
@@ -642,7 +807,7 @@ export class Game {
   }
 
   hideOverlays(){
-    for(const o of [this.el.intro, this.el.pause, this.el.over]) o.hidden = true;
+    for(const o of [this.el.intro, this.el.pause, this.el.over, this.el.pick]) o.hidden = true;
     this.el.countdown.hidden = true;
   }
 }

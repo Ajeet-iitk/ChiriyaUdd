@@ -1,12 +1,41 @@
 /* ==========================================================================
    The courtyard sky — canvas: dusk gradient, hills, fireflies, and a flock
-   that grows every time you get a name right.
+   that grows every time you get a name right. Day and night now melt into
+   each other instead of switching.
    ========================================================================== */
 
 const TAU = Math.PI * 2;
 
-function readVar(name){
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const PALETTE_KEYS = {
+  sky1: "--sky-1", sky2: "--sky-2", sky3: "--sky-3",
+  sun: "--sun", hill1: "--hill-1", hill2: "--hill-2", hill3: "--hill-3",
+  marigold: "--marigold", ink: "--ink", bg: "--bg",
+};
+
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+function parseColor(str){
+  str = (str || "").trim();
+  if(str.startsWith("#")){
+    let h = str.slice(1);
+    if(h.length === 3) h = h.split("").map(c => c + c).join("");
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  const m = str.match(/rgba?\(([^)]+)\)/);
+  if(m){
+    const p = m[1].split(",").map(Number);
+    return [p[0] || 0, p[1] || 0, p[2] || 0];
+  }
+  return [255, 200, 140];
+}
+
+function blend(a, b, t){
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t,
+  ];
 }
 
 export class Scene {
@@ -24,6 +53,16 @@ export class Scene {
     this.theme = document.documentElement.dataset.theme || "dark";
     this.nextAmbient = 4;
 
+    this.palettes = this._readPalettes();
+    this.darkFrom = this.darkTo = this.theme === "dark" ? 1 : 0;
+    this.darkness = this.darkFrom;
+    this.from = this.palettes[this.theme] || this.palettes.dark;
+    this.to = this.from;
+    this.mix = 1;
+    this.eased = 1;
+    this.t0 = 0;
+    this._lastBuild = 0;
+
     this.resize();
     window.addEventListener("resize", () => this.resize(), { passive: true });
 
@@ -35,9 +74,42 @@ export class Scene {
     });
   }
 
+  _readPalettes(){
+    const root = document.documentElement;
+    const prev = root.dataset.theme;
+    const out = {};
+    for(const t of ["dark", "light"]){
+      root.dataset.theme = t;
+      const cs = getComputedStyle(root);
+      const p = {};
+      for(const [key, css] of Object.entries(PALETTE_KEYS)){
+        p[key] = parseColor(cs.getPropertyValue(css));
+      }
+      out[t] = p;
+    }
+    root.dataset.theme = prev;
+    return out;
+  }
+
   refresh(){
     this.theme = document.documentElement.dataset.theme || "dark";
+    const target = this.palettes[this.theme];
+    if(!target) return;
+    this.from = this._blend(this.from, this.to, this.eased);
+    this.to = target;
+    this.darkFrom = this.darkness;
+    this.darkTo = this.theme === "dark" ? 1 : 0;
+    this.mix = this.reduced ? 1 : 0;
+    this.eased = this.reduced ? 1 : 0;
+    this.t0 = performance.now();
+    this._lastBuild = 0;
     this._build();
+  }
+
+  _blend(a, b, t){
+    const out = {};
+    for(const k of Object.keys(PALETTE_KEYS)) out[k] = blend(a[k], b[k], t);
+    return out;
   }
 
   resize(){
@@ -56,7 +128,7 @@ export class Scene {
 
   _seed(){
     const count = this.reduced ? 8 : Math.round(Math.min(34, this.w / 42));
-    this.fireflies = Array.from({ length: count }, (_, i) => ({
+    this.fireflies = Array.from({ length: count }, () => ({
       x: Math.random(), y: 0.42 + Math.random() * 0.52,
       ax: 0.008 + Math.random() * 0.03, ay: 0.006 + Math.random() * 0.02,
       sp: 0.1 + Math.random() * 0.22, ph: Math.random() * TAU,
@@ -73,22 +145,22 @@ export class Scene {
     ctx.setTransform(d, 0, 0, d, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    const dark = this.theme === "dark";
-    const sky1 = readVar("--sky-1"), sky2 = readVar("--sky-2"), sky3 = readVar("--sky-3");
-    const sun = readVar("--sun"), hill1 = readVar("--hill-1"), hill2 = readVar("--hill-2"), hill3 = readVar("--hill-3");
-    this.colors = { marigold: readVar("--marigold"), ink: readVar("--ink") };
+    const p = this._blend(this.from, this.to, this.eased);
+    const night = this.darkness;
+    this.pal = p;
+    this.colors = { marigold: this._css(p.marigold), ink: this._css(p.ink) };
 
     const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, sky1);
-    g.addColorStop(0.52, sky2);
-    g.addColorStop(1, sky3);
+    g.addColorStop(0, this._css(p.sky1));
+    g.addColorStop(0.52, this._css(p.sky2));
+    g.addColorStop(1, this._css(p.sky3));
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // stars
-    if(dark){
+    // stars wait for the dark
+    if(night > 0.02){
       for(const s of this.stars){
-        ctx.globalAlpha = 0.25 + 0.5 * (0.5 + 0.5 * Math.sin(s.ph));
+        ctx.globalAlpha = (0.25 + 0.5 * (0.5 + 0.5 * Math.sin(s.ph))) * night;
         ctx.fillStyle = "#fff4e2";
         ctx.beginPath();
         ctx.arc(s.x * w, s.y * h, s.r, 0, TAU);
@@ -97,29 +169,42 @@ export class Scene {
       ctx.globalAlpha = 1;
     }
 
-    // sun / moon glow
-    const sx = w * 0.71, sy = h * (dark ? 0.28 : 0.24), sr = Math.min(w, h) * 0.2;
+    // sun by day, crescent moon by night
+    const sx = w * 0.71, sy = h * (0.24 + 0.045 * night), sr = Math.min(w, h) * 0.2;
     const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
-    sg.addColorStop(0, this._rgba(sun, dark ? 0.95 : 0.9));
-    sg.addColorStop(0.16, this._rgba(sun, dark ? 0.7 : 0.62));
-    sg.addColorStop(0.42, this._rgba(sun, 0.13));
-    sg.addColorStop(1, this._rgba(sun, 0));
+    sg.addColorStop(0, this._rgba(p.sun, 0.95));
+    sg.addColorStop(0.16, this._rgba(p.sun, 0.68));
+    sg.addColorStop(0.42, this._rgba(p.sun, 0.13));
+    sg.addColorStop(1, this._rgba(p.sun, 0));
     ctx.fillStyle = sg;
     ctx.beginPath();
     ctx.arc(sx, sy, sr, 0, TAU);
     ctx.fill();
 
-    const disc = Math.min(w, h) * (dark ? 0.037 : 0.045);
-    ctx.fillStyle = this._rgba(sun, dark ? 0.85 : 0.72);
+    const disc = Math.min(w, h) * (0.046 - 0.009 * night);
+    ctx.fillStyle = this._rgba(p.sun, 0.86);
     ctx.beginPath();
     ctx.arc(sx, sy, disc, 0, TAU);
     ctx.fill();
+    if(night > 0.04){
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, disc, 0, TAU);
+      ctx.clip();
+      ctx.globalAlpha = night * 0.92;
+      ctx.fillStyle = this._css(p.sky1);
+      ctx.beginPath();
+      ctx.arc(sx + disc * 0.52, sy - disc * 0.22, disc * 0.96, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
 
     // layered hills
     const layers = [
-      { c: hill1, a: dark ? 0.65 : 0.55, base: 0.82, amp: 0.05, f: 0.0016, p: 0.4 },
-      { c: hill2, a: dark ? 0.8 : 0.65, base: 0.89, amp: 0.045, f: 0.0022, p: 2.1 },
-      { c: hill3, a: 0.95, base: 0.965, amp: 0.03, f: 0.0031, p: 4.4 },
+      { c: p.hill1, a: 0.58 + night * 0.07, base: 0.82, amp: 0.05, f: 0.0016, p: 0.4 },
+      { c: p.hill2, a: 0.68 + night * 0.12, base: 0.89, amp: 0.045, f: 0.0022, p: 2.1 },
+      { c: p.hill3, a: 0.95, base: 0.965, amp: 0.03, f: 0.0031, p: 4.4 },
     ];
     for(const L of layers){
       ctx.beginPath();
@@ -133,13 +218,13 @@ export class Scene {
       ctx.lineTo(w, h);
       ctx.closePath();
       ctx.globalAlpha = L.a;
-      ctx.fillStyle = L.c;
+      ctx.fillStyle = this._css(L.c);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
     // a distant treeline, hand-drawn
-    ctx.fillStyle = this._rgba(hill3, 0.9);
+    ctx.fillStyle = this._rgba(p.hill3, 0.9);
     const treeY = h * 0.845;
     for(let i = 0; i < 26; i++){
       const x = (i / 25) * w + Math.sin(i * 7.3) * 14;
@@ -153,7 +238,7 @@ export class Scene {
     }
 
     // tiny courtyard rooftops on the horizon
-    ctx.fillStyle = this._rgba(hill3, 0.75);
+    ctx.fillStyle = this._rgba(p.hill3, 0.75);
     for(let i = 0; i < 5; i++){
       const x = w * (0.06 + i * 0.085), y = h * 0.858;
       ctx.fillRect(x, y, 26, 12);
@@ -167,23 +252,21 @@ export class Scene {
 
     // horizon haze
     const hz = ctx.createLinearGradient(0, h * 0.62, 0, h);
-    hz.addColorStop(0, this._rgba(sun, 0));
-    hz.addColorStop(0.6, this._rgba(sun, dark ? 0.05 : 0.1));
-    hz.addColorStop(1, this._rgba(sky1, 0));
+    hz.addColorStop(0, this._rgba(p.sun, 0));
+    hz.addColorStop(0.6, this._rgba(p.sun, 0.05 + (1 - night) * 0.05));
+    hz.addColorStop(1, this._rgba(p.sky1, 0));
     ctx.fillStyle = hz;
     ctx.fillRect(0, h * 0.62, w, h * 0.38);
   }
 
-  _rgba(hex, a){
-    hex = (hex || "").trim();
-    if(hex.startsWith("#")){
-      let h = hex.slice(1);
-      if(h.length === 3) h = h.split("").map(c => c + c).join("");
-      const n = parseInt(h, 16);
-      return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
-    }
-    if(hex.startsWith("rgb")) return hex;
-    return `rgba(255,200,140,${a})`;
+  _css(rgbArr){
+    return `rgb(${Math.round(rgbArr[0])},${Math.round(rgbArr[1])},${Math.round(rgbArr[2])})`;
+  }
+
+  _rgba(c, a){
+    if(Array.isArray(c)) return `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${a})`;
+    const p = parseColor(c);
+    return `rgba(${p[0]},${p[1]},${p[2]},${a})`;
   }
 
   spawnBirds(n = 3, fromBottom = false){
@@ -215,27 +298,38 @@ export class Scene {
     if(document.hidden) return;
     this.t += dt;
 
+    if(this.mix < 1){
+      this.mix = clamp((now - this.t0) / 1150, 0, 1);
+      this.eased = this.mix * this.mix * (3 - 2 * this.mix);
+      this.darkness = this.darkFrom + (this.darkTo - this.darkFrom) * this.eased;
+      if(now - this._lastBuild > 34 || this.mix === 1){
+        this._lastBuild = now;
+        this._build();
+      }
+    }
+
     const ctx = this.ctx, w = this.w, h = this.h, d = this.dpr;
     ctx.setTransform(d, 0, 0, d, 0, 0);
     ctx.clearRect(0, 0, w, h);
     ctx.drawImage(this.cache, 0, 0, w, h);
 
-    // fireflies
+    // fireflies, only really alive after dark
     const marigold = this.colors?.marigold || "#ffc56e";
+    const glow = 0.35 + this.darkness * 0.65;
     for(const f of this.fireflies){
       const px = (f.x + Math.sin(this.t * f.sp + f.ph) * f.ax) * w;
       const py = (f.y + Math.cos(this.t * f.sp * 0.8 + f.ph) * f.ay) * h;
       const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(this.t * 1.4 + f.ph * 2));
       const r = f.r * (2.6 + tw * 1.5);
       const g = ctx.createRadialGradient(px, py, 0, px, py, r * 3.4);
-      g.addColorStop(0, this._rgba(marigold, 0.55 * tw * f.a));
-      g.addColorStop(0.35, this._rgba(marigold, 0.16 * tw * f.a));
+      g.addColorStop(0, this._rgba(marigold, 0.55 * tw * f.a * glow));
+      g.addColorStop(0.35, this._rgba(marigold, 0.16 * tw * f.a * glow));
       g.addColorStop(1, this._rgba(marigold, 0));
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(px, py, r * 3.4, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = this._rgba("#fff6e8", 0.55 * f.a * tw);
+      ctx.fillStyle = this._rgba("#fff6e8", 0.55 * f.a * tw * glow);
       ctx.beginPath();
       ctx.arc(px, py, f.r * 0.75, 0, TAU);
       ctx.fill();

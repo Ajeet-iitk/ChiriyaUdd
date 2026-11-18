@@ -10,7 +10,7 @@ const defaults = {
   musicVol: 0.38,
   sfxVol: 0.72,
   mode: "classic",
-  best: { classic: 0, sprint: 0, zen: 0 },
+  best: { classic: 0, sprint: 0, zen: 0, maya: 0 },
   plays: 0,
 };
 
