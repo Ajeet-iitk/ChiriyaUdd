@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Udaan Almanac — 127 names, three tongues, one honest verdict each.
+   Udaan Almanac — 147 names, three tongues, one honest verdict each.
    `flies` is the truth. Notes exist for the names people argue about.
    ========================================================================== */
 
@@ -172,6 +172,48 @@ export const WORDS = [
     note: { en: "In stories, certainly. In your living room, it is furniture.", hi: "कहानियों में बिल्कुल। आपके घर में यह फ़र्नीचर है।", hl: "Kahaaniyon mein bilkul. Ghar mein yeh furniture hai." } },
   { id: "chudail", en: "Witch", hi: "चुड़ैल", hl: "Chudail", flies: true, cat: "myth",
     note: { en: "On a broom, in every story worth telling. We allow it.", hi: "हर अच्छी कहानी में झाड़ू पर। हमें मंज़ूर है।", hl: "Har achhi kahaani mein jhadu par. Humein manzoor hai." } },
+
+  /* ——— the arguments worth having ——— */
+  { id: "baadal", en: "Cloud", hi: "बादल", hl: "Baadal", flies: true, cat: "object",
+    note: { en: "No wings, no flapping — and yet it crosses the whole sky.", hi: "पंख नहीं, फड़फड़ाहट नहीं — फिर भी पूरा आकाश पार करता है।", hl: "Pankh nahi, fadfadaahat nahi — phir bhi poora aasmaan paar karta hai." } },
+  { id: "dhuan", en: "Smoke", hi: "धुआँ", hl: "Dhuan", flies: true, cat: "object",
+    note: { en: "It rises, wanders, and vanishes. Flight by another name.", hi: "उठता है, भटकता है, ग़ायब हो जाता है। उड़ान का दूसरा नाम।", hl: "Uthta hai, bhatakta hai, gayab ho jaata hai. Udaan ka doosra naam." } },
+  { id: "dhool", en: "Dust", hi: "धूल", hl: "Dhool", flies: true, cat: "object",
+    note: { en: "A handful in the air is a hundred tiny flights.", hi: "हवा में मुट्ठी भर धूल — सौ छोटी उड़ानें।", hl: "Hawa mein mutthi bhar dhool — sau chhoti udaanein." } },
+  { id: "raakh", en: "Ash", hi: "राख", hl: "Raakh", flies: true, cat: "object",
+    note: { en: "What is left after fire still rises on the wind.", hi: "आग के बाद बची राख भी हवा में उठती है।", hl: "Aag ke baad bachi raakh bhi hawa mein uthti hai." } },
+  { id: "pankh", en: "Feather", hi: "पंख", hl: "Pankh", flies: true, cat: "object",
+    note: { en: "Light enough to ride the wind. It only needs a push.", hi: "हवा पर सवार होने के लिए काफ़ी हल्का। बस एक धक्का चाहिए।", hl: "Hawa par sawaar hone ke liye kaafi halka. Bas ek dhakka chahiye." } },
+  { id: "patta", en: "Leaf", hi: "पत्ता", hl: "Patta", flies: true, cat: "object",
+    note: { en: "On the branch it stays; let go, and the wind takes it.", hi: "डाली पर टिका रहता है; छूटते ही हवा ले जाती है।", hl: "Daali par tika rehta hai; chhootte hi hawa le jaati hai." } },
+  { id: "parag", en: "Pollen", hi: "पराग", hl: "Parag", flies: true, cat: "object",
+    note: { en: "Too small to see, and built to travel.", hi: "दिखने में बहुत छोटा, पर सफ़र के लिए बना है।", hl: "Dikhne mein bahut chhota, par safar ke liye bana hai." } },
+  { id: "kagaz-panna", en: "Paper", hi: "काग़ज़", hl: "Kagaz", flies: true, cat: "object",
+    note: { en: "A loose sheet is a very temporary bird.", hi: "ढीला काग़ज़ एक बहुत अस्थायी पक्षी है।", hl: "Dheela kagaz ek bahut asthaayi parinda hai." } },
+  { id: "bulbula", en: "Bubble", hi: "बुलबुला", hl: "Bulbula", flies: true, cat: "object",
+    note: { en: "It floats until the air decides otherwise.", hi: "जब तक हवा मना न करे, तब तक तैरता है।", hl: "Jab tak hawa mana na kare, tab tak tairta hai." } },
+  { id: "frisbee", en: "Frisbee", hi: "फ्रिसबी", hl: "Frisbee", flies: true, cat: "object",
+    note: { en: "A disc that flies better than most birds.", hi: "एक चक्र जो अधिकतर पक्षियों से बेहतर उड़ता है।", hl: "Ek chakra jo zyadatar parindon se behtar udta hai." } },
+  { id: "boomerang", en: "Boomerang", hi: "बूमरैंग", hl: "Boomerang", flies: true, cat: "object",
+    note: { en: "Out, around, and back — flight with a return ticket.", hi: "गया, घूमा, लौट आया — वापसी टिकट वाली उड़ान।", hl: "Gaya, ghooma, laut aaya — wapsi ticket wali udaan." } },
+  { id: "teer", en: "Arrow", hi: "तीर", hl: "Teer", flies: true, cat: "object",
+    note: { en: "Airborne only while the bow insists.", hi: "जब तक धनुष ज़िद करे, तब तक हवा में।", hl: "Jab tak dhanush zid kare, tab tak hawa mein." } },
+  { id: "goli", en: "Bullet", hi: "गोली", hl: "Goli", flies: true, cat: "object",
+    note: { en: "Fast, straight, and gone. Flight without wings.", hi: "तेज़, सीधी, और ग़ायब। पंखों के बिना उड़ान।", hl: "Tez, seedhi, aur gayab. Pankhon ke bina udaan." } },
+  { id: "parachute", en: "Parachute", hi: "पैराशूट", hl: "Parachute", flies: true, cat: "object",
+    note: { en: "It falls with style, and that is the whole point.", hi: "शान से गिरता है — और यही पूरा मक़सद है।", hl: "Shaan se girta hai — aur yahi poora maksad hai." } },
+  { id: "chhata", en: "Umbrella", hi: "छाता", hl: "Chhata", flies: false, cat: "object",
+    note: { en: "Mary Poppins had a magic one. Yours keeps the rain off.", hi: "मैरी पॉपिंस के पास जादुई था। तुम्हारा बारिश से बचाता है।", hl: "Mary Poppins ke paas jaadui tha. Tumhara baarish se bachata hai." } },
+  { id: "upgrah", en: "Satellite", hi: "उपग्रह", hl: "Upgrah", flies: false, cat: "machine",
+    note: { en: "It falls around the Earth forever — that is orbit, not flight.", hi: "यह पृथ्वी के चारों ओर हमेशा गिरता है — यह कक्षा है, उड़ान नहीं।", hl: "Yeh prithvi ke charon or hamesha girta hai — yeh kaksha hai, udaan nahi." } },
+  { id: "dhoomketu", en: "Comet", hi: "धूमकेतु", hl: "Dhoomketu", flies: true, cat: "object",
+    note: { en: "A ball of ice with a tail of light, crossing the night.", hi: "बर्फ़ की गेंद, रोशनी की पूँछ — रात पार करती हुई।", hl: "Barf ki gend, roshni ki poonch — raat paar karti hui." } },
+  { id: "bhoot", en: "Ghost", hi: "भूत", hl: "Bhoot", flies: true, cat: "myth",
+    note: { en: "Floats, drifts through walls. In this courtyard, that counts.", hi: "तैरता है, दीवारों से गुज़रता है। इस आँगन में यह उड़ान है।", hl: "Tairta hai, deewaron se guzarta hai. Is aangan mein yeh udaan hai." } },
+  { id: "gilhari", en: "Squirrel", hi: "गिलहरी", hl: "Gilhari", flies: false, cat: "animal",
+    note: { en: "The flying squirrel is a cousin with a parachute. This one keeps to the branches.", hi: "उड़न गिलहरी पैराशूट वाली चचेरी बहन है। यह शाखाओं पर ही रहती है।", hl: "Udan gilhari parachute wali cousin hai. Yeh shaakhaon par hi rehti hai." } },
+  { id: "farishta", en: "Angel", hi: "देवदूत", hl: "Farishta", flies: true, cat: "myth",
+    note: { en: "Wings, halo, and a permanent tailwind.", hi: "पंख, प्रभामंडल, और हमेशा अनुकूल हवा।", hl: "Pankh, halo, aur hamesha anukool hawa." } },
 ];
 
 /** Pick a shuffled bag so names don't repeat until the bag empties. */

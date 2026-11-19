@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Chiriya Udd — the bird lives in your fingertip</title>
-<meta name="description" content="Chiriya Udd is the courtyard game of flying names. Hold your finger on the palm, lift it only when the thing can fly. A hand-built browser game with procedural music, Hindi · English · Hinglish, and an almanac of 127 names."/>
+<title>Chiriya Udd — Kingdom of the Birds</title>
+<meta name="description" content="Chiriya Udd is the courtyard game of flying names — now a Kingdom of the Birds. Rest your finger on the palm, lift it only when the thing can fly. Sarus cranes, falcons, penguins and an evil peacock keep the four courts. Hindi · English · Hinglish."/>
 <meta name="theme-color" content="#0a0911"/>
 <meta name="color-scheme" content="dark light"/>
 <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml"/>
@@ -13,8 +13,8 @@
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Chiriya Udd"/>
 <meta property="og:url" content="https://ajeet-iitk.github.io/ChiriyaUdd/"/>
-<meta property="og:title" content="Chiriya Udd — the bird lives in your fingertip"/>
-<meta property="og:description" content="Lift your finger when it flies. Keep it down when it doesn't. A courtyard classic, rebuilt for the browser."/>
+<meta property="og:title" content="Chiriya Udd — Kingdom of the Birds"/>
+<meta property="og:description" content="Four bird courts. One palm. Lift your finger only when the name can fly — and let the Kingdom of the Birds decide the rest."/>
 <meta property="og:image" content="https://ajeet-iitk.github.io/ChiriyaUdd/assets/og.png"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
@@ -27,7 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Space+Grotesk:wght@400;500;600&family=Tiro+Devanagari+Hindi:ital@0;1&family=Mukta:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="./css/style.css"/>
 </head>
-<body spellcheck="false">
+<body spellcheck="false" data-view="home">
 
 <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <symbol id="i-bird" viewBox="0 0 24 24"><path d="M3 15.5c3.3-.5 5.6-2.3 7-5.6 1 2.2 2.1 3.4 3.4 3.7 1.6-1.7 3.5-2.3 5.9-1.9-1.4.6-2.4 1.6-2.9 2.8 1.2.8 2.3 2 3.2 3.4-2.2-.7-4-.8-5.4-.3-.8 1.2-1.9 2-3.5 2.5.7-1 1-1.8.9-2.7-1.6.6-3.1.6-4.4-.1"/></symbol>
@@ -51,6 +51,47 @@
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c4.5 4.7 4.5 12.3 0 17-4.5-4.7-4.5-12.3 0-17z"/></symbol>
   <symbol id="i-palm" viewBox="0 0 24 24"><path d="M12 20.5c-4.3 0-7-3.1-7-7.4V8.4a1.7 1.7 0 0 1 3.4 0v2.2M8.5 6.6a1.7 1.7 0 0 1 3.4 0v3.6M12 5.6a1.7 1.7 0 0 1 3.4 0v4.6M15.5 7.4a1.7 1.7 0 0 1 3.4 0v5.7c0 4.3-2.6 7.4-6.9 7.4"/></symbol>
   <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3.2 20 7.6v8.8L12 20.8 4 16.4V7.6zM4 7.6l8 4.4 8-4.4M12 12v8.8"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3.4" y="6.6" width="17.2" height="12.6" rx="3"/><circle cx="12" cy="12.9" r="3.4"/><path d="M8.6 6.6 10 4.2h4l1.4 2.4"/></symbol>
+  <symbol id="i-grain" viewBox="0 0 24 24"><path d="M12 21V8"/><path d="M12 11.5c0-2.6 2.2-4.2 4.8-4.2M12 11.5c0-2.6-2.2-4.2-4.8-4.2M12 16c0-2.6 2.2-4.2 4.8-4.2M12 16c0-2.6-2.2-4.2-4.8-4.2M12 20.5c0-2.6 2.2-4.2 4.8-4.2M12 20.5c0-2.6-2.2-4.2-4.8-4.2"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h10.5a2.8 2.8 0 1 0-2.6-3.8M3 12h15M3 16h8.5a2.8 2.8 0 1 1-2.6 3.8"/></symbol>
+  <symbol id="i-shake" viewBox="0 0 24 24"><rect x="8.4" y="3.4" width="7.2" height="17.2" rx="2"/><path d="M4.4 8.2c-1.1 2.3-1.1 5.3 0 7.6M19.6 8.2c1.1 2.3 1.1 5.3 0 7.6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.4V12l3 2"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 8.5 8 12l4-6 4 6 4-3.5-1.6 9H5.6z"/><circle cx="12" cy="4.6" r="1.3" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-crane" viewBox="0 0 64 64">
+    <path d="M13 36c0-6 5-10 12-10 6 0 11 3 13 8 1 3-1 6-5 7-6 2-13 2-18 0-2-1-2-3-2-5z"/>
+    <path d="M38 31c4-1 7-5 8-10 1-4 3-7 6-7 3 0 5 2 5 5 0 4-3 6-6 8-2 1-3 2-4 4"/>
+    <path d="M52 15h7l-7 4"/>
+    <path d="M24 41v12M33 41l1 12M21 53h6M32 53h6"/>
+    <path d="M14 33 8 30M47 14c-2-2-2-4 0-6"/>
+    <circle cx="47" cy="12" r="2" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-falcon" viewBox="0 0 64 64">
+    <path d="M32 5c3.4 0 6 2.6 6 6 0 2.2-.9 4-2.4 5.2l4.4 3.2c7.6.6 13.2 4 18 11.6-7.6-2.8-14-3-19.2.2L36 56l-4-24.8C26.8 28 20.4 28.2 12.8 31c4.8-7.6 10.4-11 18-11.6l4.4-3.2C33.7 15 32.8 13.2 32.8 11c0-3.4 2.6-6 5.8-6z" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-penguin" viewBox="0 0 64 64">
+    <path d="M32 5c8 0 13 6 15 16 2 10 3 20 0 27-2 6-8 10-15 10s-13-4-15-10c-3-7-2-17 0-27C19 8 24 5 32 5z"/>
+    <path d="M32 17c-5 0-8 6-8 14 0 11 3 20 8 24 5-4 8-13 8-24 0-8-3-14-8-14z" opacity=".3"/>
+    <circle cx="28" cy="16" r="1.4" fill="currentColor" stroke="none"/>
+    <circle cx="36" cy="16" r="1.4" fill="currentColor" stroke="none"/>
+    <path d="M30 20l2 2 2-2-2 4z" fill="currentColor" stroke="none"/>
+    <path d="M24 58l-3 4M40 58l3 4"/>
+  </symbol>
+  <symbol id="i-peacock" viewBox="0 0 64 64">
+    <path d="M32 30c-13 0-23 8-23 19 0 4 1 7 3 10M32 30c13 0 23 8 23 19 0 4-1 7-3 10"/>
+    <path d="M32 35c-8 0-14 6-14 14M32 35c8 0 14 6 14 14"/>
+    <path d="M32 40c5 0 8 4 8 9 0 7-3 12-8 15-5-3-8-8-8-15 0-5 3-9 8-9z"/>
+    <path d="M31 46h2l-1 4z" fill="currentColor" stroke="none"/>
+    <circle cx="17" cy="39" r="3.2"/><circle cx="47" cy="39" r="3.2"/>
+    <circle cx="13" cy="52" r="2.6"/><circle cx="51" cy="52" r="2.6"/>
+    <circle cx="17" cy="39" r="1" fill="currentColor" stroke="none"/><circle cx="47" cy="39" r="1" fill="currentColor" stroke="none"/>
+    <path d="M32 29c-2-4-1-7 1-9M31 27c-3-2-5-1-6 1M34 27c3-2 5-1 6 1"/>
+  </symbol>
+  <symbol id="i-hummingbird" viewBox="0 0 32 32">
+    <path d="M14 15c2-4 6-6 9-5 3 1 4 4 3 7-1 4-4 8-8 10l-3-7-2 6-2-7c-3 1-6-1-7-4 3 1 6 1 8 0z" fill="currentColor" stroke="none"/>
+    <path d="M22 12 31 9l-8 6z" fill="currentColor" stroke="none"/>
+    <path class="hum-wing" d="M16 15c-4-4-9-6-12-5 2 4 6 7 11 8z" fill="currentColor" opacity=".45" stroke="none"/>
+    <path class="hum-wing" d="M15 14c1-5 4-9 7-10 1 4-1 8-5 11z" fill="currentColor" opacity=".35" stroke="none"/>
+  </symbol>
 </svg>
 
 <div class="sky-wrap" aria-hidden="true">
@@ -60,11 +101,29 @@
   <div class="vignette"></div>
 </div>
 
+<div class="meadow" id="meadow" aria-hidden="true">
+  <div class="meadow-birds" id="meadowBirds"></div>
+  <div class="meadow-grain" id="meadowGrain"></div>
+</div>
+
+<div class="meadow-dock" id="meadowDock" role="group" aria-label="Courtyard birds">
+  <button class="meadow-btn" id="feedBtn" type="button" title="Scatter grain">
+    <svg><use href="#i-grain"/></svg><span data-i18n="feed">Feed</span>
+  </button>
+  <button class="meadow-btn" id="shooBtn" type="button" title="Shoo the birds">
+    <svg><use href="#i-wind"/></svg><span data-i18n="shoo">Shoo</span>
+  </button>
+  <span class="meadow-hint" id="meadowHint" data-i18n="shakeHint">Shake your phone to scatter them.</span>
+</div>
+
 <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 
 <header class="topbar" id="topbar">
   <a class="brand" href="#home" aria-label="Chiriya Udd — home">
-    <span class="brand-mark"><svg><use href="#i-bird"/></svg></span>
+    <span class="brand-mark">
+      <svg><use href="#i-bird"/></svg>
+      <span class="brand-crown" aria-hidden="true"><svg><use href="#i-crown"/></svg></span>
+    </span>
     <span class="brand-type">
       <strong>Chiriya Udd</strong>
       <em data-i18n="brandSub">चिड़िया उड़</em>
@@ -72,10 +131,10 @@
   </a>
 
   <nav class="nav" aria-label="Primary">
-    <a href="#play" data-nav="play" data-i18n="navPlay">Play</a>
-    <a href="#explore" data-nav="explore" data-i18n="navExplore">Explore</a>
-    <a href="#almanac" data-nav="almanac" data-i18n="navAlmanac">Almanac</a>
-    <a href="#how" data-nav="how" data-i18n="navHow">How</a>
+    <a href="#play" data-nav="play"><span data-i18n="navPlay">Play</span><svg class="nav-bird"><use href="#i-falcon"/></svg></a>
+    <a href="#explore" data-nav="explore"><span data-i18n="navExplore">Explore</span><svg class="nav-bird"><use href="#i-hummingbird"/></svg></a>
+    <a href="#almanac" data-nav="almanac"><span data-i18n="navAlmanac">Almanac</span><svg class="nav-bird"><use href="#i-crane"/></svg></a>
+    <a href="#how" data-nav="how"><span data-i18n="navHow">How</span><svg class="nav-bird"><use href="#i-peacock"/></svg></a>
   </nav>
 
   <div class="controls">
@@ -87,13 +146,21 @@
       <svg class="when-dark"><use href="#i-sun"/></svg>
       <svg class="when-light"><use href="#i-moon"/></svg>
     </button>
-    <button class="icon-btn" id="musicBtn" type="button" aria-label="Toggle background music" aria-pressed="true" title="Music">
-      <svg><use href="#i-music"/></svg>
-    </button>
-    <button class="icon-btn" id="soundBtn" type="button" aria-label="Toggle sound" aria-pressed="true" title="Sound">
-      <svg class="when-on"><use href="#i-sound"/></svg>
-      <svg class="when-off"><use href="#i-mute"/></svg>
-    </button>
+    <div class="audio-wrap">
+      <button class="icon-btn" id="audioBtn" type="button" aria-label="Sound" title="Sound" aria-expanded="false" aria-controls="audioPanel">
+        <svg class="when-on"><use href="#i-sound"/></svg>
+        <svg class="when-off"><use href="#i-mute"/></svg>
+      </button>
+      <div class="audio-panel" id="audioPanel" hidden>
+        <div class="audio-head">
+          <span data-i18n="audio">Sound</span>
+          <button class="audio-off" id="audioAll" type="button"><span data-i18n="muteAll">Mute all</span></button>
+        </div>
+        <label class="audio-row"><span data-i18n="music">Music</span><input type="range" id="panelMusicVol" min="0" max="100" value="38"/></label>
+        <label class="audio-row"><span data-i18n="effects">Effects</span><input type="range" id="panelSfxVol" min="0" max="100" value="72"/></label>
+        <p class="audio-note" data-i18n="audioHint">One switch for the whole courtyard. The sliders stay put.</p>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -110,9 +177,60 @@
         </h1>
         <p class="hero-sub reveal" style="--d:.12s" data-i18n="heroSub">One palm open. A hundred names. Lift your finger only when the thing can fly — and let the courtyard decide the rest.</p>
         <div class="hero-actions reveal" style="--d:.18s">
-          <a class="btn btn-primary" href="#play" data-start>
+          <a class="btn btn-primary has-phoenix" href="#play" data-start>
             <span data-i18n="heroCta">Enter the baithak</span>
             <svg><use href="#i-arrow"/></svg>
+            <span class="phoenix" id="heroPhoenix" aria-hidden="true">
+              <svg viewBox="0 0 16 16" shape-rendering="crispEdges" focusable="false">
+                <g class="phoenix-tail">
+                  <rect x="4" y="8" width="1" height="1" fill="#f0708c"/>
+                  <rect x="3" y="9" width="1" height="1" fill="#ff8a4c"/>
+                  <rect x="2" y="10" width="1" height="1" fill="#f0708c"/>
+                  <rect x="1" y="11" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="2" y="11" width="1" height="1" fill="#f0708c"/>
+                  <rect x="3" y="12" width="1" height="1" fill="#ff8a4c"/>
+                  <rect x="2" y="12" width="1" height="1" fill="#7a3a54"/>
+                  <rect x="1" y="13" width="1" height="1" fill="#f0708c"/>
+                  <rect x="2" y="13" width="1" height="1" fill="#ff8a4c"/>
+                  <rect x="3" y="13" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="3" y="14" width="1" height="1" fill="#f0708c"/>
+                  <rect x="4" y="14" width="1" height="1" fill="#7a3a54"/>
+                </g>
+                <g class="phoenix-body">
+                  <rect x="7" y="6" width="4" height="1" fill="#ff8a4c"/>
+                  <rect x="6" y="7" width="5" height="1" fill="#ff8a4c"/>
+                  <rect x="5" y="8" width="6" height="1" fill="#ff8a4c"/>
+                  <rect x="4" y="9" width="7" height="1" fill="#ff8a4c"/>
+                  <rect x="5" y="10" width="5" height="1" fill="#ff8a4c"/>
+                  <rect x="5" y="11" width="4" height="1" fill="#ffc56e"/>
+                  <rect x="6" y="12" width="2" height="1" fill="#ff8a4c"/>
+                  <rect x="7" y="7" width="3" height="1" fill="#ffc56e"/>
+                  <rect x="7" y="8" width="2" height="1" fill="#fff2dc"/>
+                  <rect x="8" y="9" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="6" y="10" width="1" height="1" fill="#7a3a54"/>
+                  <rect x="7" y="10" width="1" height="1" fill="#7a3a54"/>
+                </g>
+                <g class="phoenix-head">
+                  <rect x="9" y="0" width="1" height="1" fill="#f0708c"/>
+                  <rect x="9" y="1" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="11" y="1" width="1" height="1" fill="#f0708c"/>
+                  <rect x="10" y="2" width="2" height="1" fill="#ffc56e"/>
+                  <rect x="12" y="2" width="1" height="1" fill="#ff8a4c"/>
+                  <rect x="10" y="3" width="2" height="1" fill="#ffc56e"/>
+                  <rect x="12" y="3" width="2" height="1" fill="#ff8a4c"/>
+                  <rect x="10" y="4" width="2" height="1" fill="#ffc56e"/>
+                  <rect x="10" y="5" width="2" height="1" fill="#ff8a4c"/>
+                  <g class="phoenix-pupil"><rect x="11" y="3" width="1" height="1" fill="#2a1220"/></g>
+                </g>
+                <g class="phoenix-legs">
+                  <rect x="8" y="13" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="10" y="13" width="1" height="1" fill="#ffc56e"/>
+                  <rect x="7" y="14" width="2" height="1" fill="#ffc56e"/>
+                  <rect x="9" y="14" width="2" height="1" fill="#ffc56e"/>
+                </g>
+              </svg>
+              <span class="phoenix-flame"></span>
+            </span>
           </a>
           <a class="btn btn-ghost" href="#how" data-i18n="heroCta2">How it's played</a>
         </div>
@@ -154,12 +272,14 @@
     </div>
 
     <div class="mode-grid" id="modeGrid">
-      <article class="mode-card" data-mode="classic" style="--accent:var(--ember)">
+      <article class="mode-card" data-mode="classic" style="--accent:#e8874f">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-crane"/></svg></span>
         <div class="mode-top">
-          <span class="mode-icon"><svg><use href="#i-feather"/></svg></span>
+          <span class="mode-icon"><svg><use href="#i-crane"/></svg></span>
           <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="classic">—</b></span>
         </div>
         <h3 data-i18n="modeClassic">Baithak</h3>
+        <p class="mode-theme-line" data-i18n="themeSarus">Sarus crane court</p>
         <p data-i18n="modeClassicDesc">The full courtyard. Three feathers to lose, and the names keep coming faster.</p>
         <div class="mode-meta"><span>∞</span><span data-i18n="threeLives">3 lives</span></div>
         <button class="mode-play" type="button" data-play-mode="classic">
@@ -167,12 +287,14 @@
         </button>
       </article>
 
-      <article class="mode-card" data-mode="sprint" style="--accent:var(--marigold)">
+      <article class="mode-card" data-mode="sprint" style="--accent:#5fd6e6">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-falcon"/></svg></span>
         <div class="mode-top">
-          <span class="mode-icon"><svg><use href="#i-bolt"/></svg></span>
+          <span class="mode-icon"><svg><use href="#i-falcon"/></svg></span>
           <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="sprint">—</b></span>
         </div>
         <h3 data-i18n="modeSprint">Bijli</h3>
+        <p class="mode-theme-line" data-i18n="themeFalcon">Falcon court</p>
         <p data-i18n="modeSprintDesc">Forty-five seconds of lightning. No feathers — just the clock and your nerve.</p>
         <div class="mode-meta"><span>45s</span><span data-i18n="noLives">no lives</span></div>
         <button class="mode-play" type="button" data-play-mode="sprint">
@@ -180,12 +302,14 @@
         </button>
       </article>
 
-      <article class="mode-card" data-mode="zen" style="--accent:var(--teal)">
+      <article class="mode-card" data-mode="zen" style="--accent:#a8d8e8">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-penguin"/></svg></span>
         <div class="mode-top">
-          <span class="mode-icon"><svg><use href="#i-leaf"/></svg></span>
+          <span class="mode-icon"><svg><use href="#i-penguin"/></svg></span>
           <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="zen">—</b></span>
         </div>
         <h3 data-i18n="modeZen">Dheere</h3>
+        <p class="mode-theme-line" data-i18n="themePenguin">Penguin court</p>
         <p data-i18n="modeZenDesc">No clock, no shame, and a quiet hint on every name. Learn the almanac by heart.</p>
         <div class="mode-meta"><span>∞</span><span data-i18n="withHints">with hints</span></div>
         <button class="mode-play" type="button" data-play-mode="zen">
@@ -193,12 +317,14 @@
         </button>
       </article>
 
-      <article class="mode-card" data-mode="maya" style="--accent:var(--rose)">
+      <article class="mode-card" data-mode="maya" style="--accent:#b07df0">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-peacock"/></svg></span>
         <div class="mode-top">
-          <span class="mode-icon"><svg><use href="#i-cube"/></svg></span>
+          <span class="mode-icon"><svg><use href="#i-peacock"/></svg></span>
           <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="maya">—</b></span>
         </div>
         <h3 data-i18n="modeMaya">Maya</h3>
+        <p class="mode-theme-line" data-i18n="themePeacock">Evil peacock court</p>
         <p data-i18n="modeMayaDesc">A 3D vision floats beside every name — and sometimes it lies. Trust the name, not the picture.</p>
         <div class="mode-meta"><span data-i18n="visionShort">3D</span><span data-i18n="withTricks">with tricks</span></div>
         <button class="mode-play" type="button" data-play-mode="maya">
@@ -211,7 +337,7 @@
       <div class="teaser-copy">
         <p class="eyebrow"><span class="dot"></span><span data-i18n="teaserKicker">Explore</span></p>
         <h2 data-i18n="teaserTitle">Small wonders, hidden in plain sight</h2>
-        <p data-i18n="teaserSub">The sky remembers every bird you free. The music is tuned, not downloaded. And there are 127 names with reasons.</p>
+        <p data-i18n="teaserSub">The sky remembers every bird you free. The music is tuned, not downloaded. And there are 147 names with reasons.</p>
         <a class="btn btn-ghost" href="#explore"><span data-i18n="teaserCta">Open the explore shelf</span><svg><use href="#i-arrow"/></svg></a>
       </div>
       <div class="teaser-grid">
@@ -282,7 +408,7 @@
       <article class="x-card x-almanac" style="--span:4">
         <div class="x-head">
           <span class="x-tag" data-i18n="xReference">reference</span>
-          <h2 data-i18n="xAlmanacTitle">127 names, with reasons</h2>
+          <h2 data-i18n="xAlmanacTitle">147 names, with reasons</h2>
           <p data-i18n="xAlmanacDesc">A searchable almanac of everything that flies, everything that sulks on the ground, and the charming exceptions in between.</p>
         </div>
         <div class="x-demo almanac-demo" id="almanacDemo"></div>
@@ -321,7 +447,7 @@
         <div class="x-head">
           <span class="x-tag" data-i18n="xTryIt">try it</span>
           <h2 data-i18n="xRuleTitle">The only rule, in your own hand</h2>
-          <p data-i18n="xRuleDesc">Press and hold the palm. When a flying thing is called, lift. When it can't fly, stay. That's the whole game — everything else is rhythm.</p>
+          <p data-i18n="xRuleDesc">Rest a finger on the palm. When a flying thing is called, lift. When it can't fly, leave it there. That's the whole game — everything else is rhythm.</p>
         </div>
         <div class="rule-demo">
           <div class="rule-palm">
@@ -408,6 +534,7 @@
       <div class="rule-box"><h3 data-i18n="r2t">Wings are not a promise</h3><p data-i18n="r2d">Penguins, ostriches, emus and kiwis have feathers and no flight. They are the classic trap.</p></div>
       <div class="rule-box"><h3 data-i18n="r3t">Machines count</h3><p data-i18n="r3d">Aeroplanes, rockets, drones and paper planes all fly. A submarine, however, has other ambitions.</p></div>
       <div class="rule-box"><h3 data-i18n="r4t">When in doubt, watch the ring</h3><p data-i18n="r4d">The ring is your breath. Lift early; the game never punishes a fast, correct hand.</p></div>
+      <div class="rule-box"><h3 data-i18n="r5t">The circle plays too</h3><p data-i18n="r5d">Four other fingers rest around yours. They lift, they hesitate, they get it wrong — and a wrong finger leaves the circle for good.</p></div>
     </div>
 
     <div class="keys-help">
@@ -443,6 +570,8 @@
   <div class="play-bg" aria-hidden="true">
     <div class="play-sun"></div>
     <div class="play-hills"></div>
+    <div class="play-weather"></div>
+    <div class="play-bird" id="playBird"><svg viewBox="0 0 64 64"><use href="#i-crane"/></svg></div>
   </div>
 
   <div class="play-hud">
@@ -455,6 +584,9 @@
       <div class="hud-stat hud-lives" id="hudLives"><span data-i18n="feathers">Feathers</span><b></b></div>
       <div class="hud-stat hud-time" id="hudTime" hidden><span data-i18n="time">Time</span><b>45</b></div>
     </div>
+    <button class="icon-btn hud-cam" id="hudCam" type="button" aria-label="Change camera view" title="Camera">
+      <svg><use href="#i-camera"/></svg>
+    </button>
     <button class="icon-btn" id="hudPause" type="button" aria-label="Pause" title="Pause">
       <svg><use href="#i-pause"/></svg>
     </button>
@@ -482,10 +614,11 @@
     </div>
 
     <div class="palm-zone">
+      <div class="npc-roster" id="npcRoster"></div>
       <div class="palm-hint" id="palmHint"></div>
       <div class="palm-shell" id="palmShell">
         <div class="palm-ripples" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="palm-disc" id="palmDisc" role="button" tabindex="0" aria-label="Hold here to rest your finger">
+        <div class="palm-disc" id="palmDisc" role="button" tabindex="0" aria-label="Tap to lift your finger">
           <span class="palm-lines" aria-hidden="true">
             <svg viewBox="0 0 240 240">
               <path d="M70 150c26 14 58 16 92 6" />
@@ -498,9 +631,10 @@
           <span class="palm-bird" id="palmBird" aria-hidden="true"><svg><use href="#i-bird"/></svg></span>
           <div class="hand" id="palmHand" aria-hidden="true"></div>
         </div>
+        <div class="npc-ring" id="npcRing" aria-hidden="true"></div>
         <div class="whacks" id="whacks" aria-hidden="true"></div>
       </div>
-      <p class="palm-help" data-i18n="palmHelp">hold the palm · lift for flight</p>
+      <p class="palm-help" data-i18n="palmHelp">tap to lift · rest to stay</p>
     </div>
   </div>
 
@@ -513,26 +647,26 @@
       <h2 data-i18n="pickTitle">How do you want to play?</h2>
       <p data-i18n="pickSub">Four courtyards, one palm. Pick your weather — you can change it any time.</p>
       <div class="pick-grid" id="pickGrid">
-        <button class="pick-card" type="button" data-pick-mode="classic" style="--accent:var(--ember)">
-          <span class="pick-icon"><svg><use href="#i-feather"/></svg></span>
+        <button class="pick-card" type="button" data-pick-mode="classic" style="--accent:#e8874f">
+          <span class="pick-icon"><svg><use href="#i-crane"/></svg></span>
           <span class="pick-copy"><strong data-i18n="modeClassic">Baithak</strong><em data-i18n="pickClassicMeta">3 feathers · endless</em></span>
           <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="classic">—</b></span>
           <svg class="pick-arrow"><use href="#i-arrow"/></svg>
         </button>
-        <button class="pick-card" type="button" data-pick-mode="sprint" style="--accent:var(--marigold)">
-          <span class="pick-icon"><svg><use href="#i-bolt"/></svg></span>
+        <button class="pick-card" type="button" data-pick-mode="sprint" style="--accent:#5fd6e6">
+          <span class="pick-icon"><svg><use href="#i-falcon"/></svg></span>
           <span class="pick-copy"><strong data-i18n="modeSprint">Bijli</strong><em data-i18n="pickSprintMeta">45 seconds · no feathers</em></span>
           <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="sprint">—</b></span>
           <svg class="pick-arrow"><use href="#i-arrow"/></svg>
         </button>
-        <button class="pick-card" type="button" data-pick-mode="zen" style="--accent:var(--teal)">
-          <span class="pick-icon"><svg><use href="#i-leaf"/></svg></span>
+        <button class="pick-card" type="button" data-pick-mode="zen" style="--accent:#a8d8e8">
+          <span class="pick-icon"><svg><use href="#i-penguin"/></svg></span>
           <span class="pick-copy"><strong data-i18n="modeZen">Dheere</strong><em data-i18n="pickZenMeta">no clock · hints</em></span>
           <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="zen">—</b></span>
           <svg class="pick-arrow"><use href="#i-arrow"/></svg>
         </button>
-        <button class="pick-card" type="button" data-pick-mode="maya" style="--accent:var(--rose)">
-          <span class="pick-icon"><svg><use href="#i-cube"/></svg></span>
+        <button class="pick-card" type="button" data-pick-mode="maya" style="--accent:#b07df0">
+          <span class="pick-icon"><svg><use href="#i-peacock"/></svg></span>
           <span class="pick-copy"><strong data-i18n="modeMaya">Maya</strong><em data-i18n="pickMayaMeta">3D visions · tricks</em></span>
           <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="maya">—</b></span>
           <svg class="pick-arrow"><use href="#i-arrow"/></svg>
@@ -554,6 +688,15 @@
         <div><span>3</span><p data-i18n="introS3">If it can't, keep it down.</p></div>
         <div id="introVisionStep" hidden><span>4</span><p data-i18n="introS4">In Maya, the 3D picture may lie. Trust the name.</p></div>
       </div>
+      <div class="pace-row" role="group" aria-label="Pace">
+        <span class="pace-label" data-i18n="paceTitle">Pace</span>
+        <div class="pace-opts">
+          <button class="pace-btn" type="button" data-pace="quick" data-i18n="paceQuick">Quick</button>
+          <button class="pace-btn" type="button" data-pace="normal" data-i18n="paceClassic">Classic</button>
+          <button class="pace-btn" type="button" data-pace="relaxed" data-i18n="paceRelaxed">Leisurely</button>
+        </div>
+      </div>
+      <p class="pace-hint" data-i18n="paceHint">How long each name waits. Change it any time.</p>
       <div class="sheet-actions">
         <button class="btn btn-primary" id="startBtn" type="button"><span data-i18n="begin">Begin</span><svg><use href="#i-play"/></svg></button>
         <button class="btn btn-ghost" id="introBack" type="button" data-i18n="back">Not now</button>
@@ -572,6 +715,15 @@
       <p class="eyebrow"><span class="dot"></span><span data-i18n="paused">Paused</span></p>
       <h2 data-i18n="takeBreath">Take a breath</h2>
       <p data-i18n="pauseDesc">The courtyard will wait. It's very patient.</p>
+      <div class="pace-row" role="group" aria-label="Pace">
+        <span class="pace-label" data-i18n="paceTitle">Pace</span>
+        <div class="pace-opts">
+          <button class="pace-btn" type="button" data-pace="quick" data-i18n="paceQuick">Quick</button>
+          <button class="pace-btn" type="button" data-pace="normal" data-i18n="paceClassic">Classic</button>
+          <button class="pace-btn" type="button" data-pace="relaxed" data-i18n="paceRelaxed">Leisurely</button>
+        </div>
+      </div>
+      <p class="pace-hint" data-i18n="paceHint">How long each name waits. Change it any time.</p>
       <div class="volume-row">
         <label for="musicVol"><svg><use href="#i-music"/></svg><span data-i18n="music">Music</span></label>
         <input type="range" id="musicVol" min="0" max="100" value="45"/>

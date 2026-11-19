@@ -9,6 +9,8 @@ const defaults = {
   music: true,
   musicVol: 0.38,
   sfxVol: 0.72,
+  pace: "normal",
+  camera: 0,
   mode: "classic",
   best: { classic: 0, sprint: 0, zen: 0, maya: 0 },
   plays: 0,

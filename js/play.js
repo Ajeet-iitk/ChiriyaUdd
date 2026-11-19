@@ -1,12 +1,12 @@
 /* ==========================================================================
    The baithak — game state, the finger rule, scoring, and the friendly thwacks.
-   One rule: hold the palm; lift only when it flies.
-   Maya adds a 3D vision that sometimes lies on purpose.
+   The fingertip rests on the palm by itself: tap to lift, do nothing to stay.
+   Four NPC index fingers play along, and a mistake sends one home for good.
    ========================================================================== */
 
 import { WORDS, makeBag } from "./words.js";
 import { store } from "./store.js";
-import { slipHand, mountHand } from "./hand.js";
+import { slipHand, mountHand, npcMarkup } from "./hand.js";
 import { Vision, visualKey } from "./vision.js";
 
 const $ = (id) => document.getElementById(id);
@@ -18,6 +18,28 @@ const MODES = {
   zen: { nameKey: "modeZen", descKey: "modeIntroZen", lives: 0 },
   maya: { nameKey: "modeMaya", descKey: "modeIntroMaya", lives: 3 },
 };
+
+const NPCS = [
+  { id: "nimmo", name: "Nimmo", tone: "var(--teal)",     angle: -70, skill: 0.84 },
+  { id: "bittu", name: "Bittu", tone: "var(--marigold)", angle: -24, skill: 0.9 },
+  { id: "guddu", name: "Guddu", tone: "var(--rose)",     angle: 25,  skill: 0.78 },
+  { id: "pari",  name: "Pari",  tone: "var(--ember)",    angle: 70,  skill: 0.86 },
+];
+
+const CAM_KEYS = ["camWide", "camClose", "camTilt"];
+const CAM_RATES = [0.58, 0.4, 0.78];
+const CAM_ANGLES = [0.5, 0.16, 0.92];
+
+/* each court keeps its own bird */
+const MODE_BIRD = {
+  classic: "i-crane",
+  sprint: "i-falcon",
+  zen: "i-penguin",
+  maya: "i-peacock",
+};
+
+/* how long a name waits; the setting is persisted in the store */
+const PACES = { quick: 0.78, normal: 1, relaxed: 1.34 };
 
 const TRICK_CHANCE = 0.38;
 
@@ -35,6 +57,8 @@ export class Game {
       verdict: $("callVerdict"), meter: $("callMeter"), flock: $("callFlock"),
       palm: $("palmDisc"), palmShell: $("palmShell"), palmHint: $("palmHint"), hand: $("palmHand"),
       ripples: document.querySelector(".palm-ripples"), whacks: $("whacks"),
+      npcRing: $("npcRing"), npcRoster: $("npcRoster"),
+      hudCam: $("hudCam"), playBird: $("playBird"),
       score: $("hudScore"), streak: $("hudStreak"), lives: $("hudLives"),
       time: $("hudTime"), speed: $("speedBar"), toast: $("playToast"),
       pick: $("playPick"), pickBack: $("pickBack"),
@@ -52,12 +76,13 @@ export class Game {
       musicVol: $("musicVol"), sfxVol: $("sfxVol"),
     };
 
+    /* the one participating finger */
     mountHand(this.el.hand, "palm");
-    this.vision = new Vision($("visionCanvas"), { rate: 0.58 });
+    this.vision = new Vision($("visionCanvas"), { rate: CAM_RATES[0] });
 
     this.phase = "idle";
     this.mode = MODES[store.get("mode")] ? store.get("mode") : "classic";
-    this.fingerDown = false;
+    this.fingerDown = true;
     this.bag = makeBag();
     this.recent = [];
     this.misses = [];
@@ -84,8 +109,14 @@ export class Game {
     this._shownTime = 45;
     this._pointerId = null;
     this._vision = null;
+    this._npcTimers = [];
+    this._sizedFor = 0;
 
+    this.cam = clamp(Number(store.get("camera")) || 0, 0, 2);
+
+    this._buildNpcs();
     this._bind();
+    this.applyCamera(false);
     this._tick = this._frame.bind(this);
     this._raf = requestAnimationFrame(this._tick);
   }
@@ -98,6 +129,7 @@ export class Game {
     el.introBack.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
     el.hudExit.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
     el.hudPause.addEventListener("click", () => this.togglePause());
+    el.hudCam.addEventListener("click", () => this.cycleCamera());
     el.resumeBtn.addEventListener("click", () => { this.sound.fx("ui"); this.resume(); });
     el.restartBtn.addEventListener("click", () => { this.sound.fx("ui"); this.begin(); });
     el.quitBtn.addEventListener("click", () => { this.sound.fx("ui"); this.exit(); });
@@ -116,36 +148,24 @@ export class Game {
       });
     }
 
-    el.musicVol.value = Math.round((store.get("musicVol") ?? 0.38) * 100);
-    el.sfxVol.value = Math.round((store.get("sfxVol") ?? 0.72) * 100);
-    el.musicVol.addEventListener("input", () => {
-      const v = el.musicVol.value / 100;
-      store.set("musicVol", v);
-      this.sound.setMusicVol(v);
+    /* pace — how long each name waits before the courtyard answers for you */
+    document.querySelectorAll("[data-pace]").forEach((btn) => {
+      btn.addEventListener("click", () => this.setPace(btn.dataset.pace));
     });
-    el.sfxVol.addEventListener("input", () => {
-      const v = el.sfxVol.value / 100;
-      store.set("sfxVol", v);
-      this.sound.setSfxVol(v);
-    });
+    this.updatePaceUI();
 
+    /* a tap on the palm is the answer: lift the finger */
     el.palm.addEventListener("pointerdown", (e) => {
       if(e.pointerType === "mouse" && e.button !== 0) return;
       e.preventDefault();
-      this.press(e.pointerId);
-      try{ el.palm.setPointerCapture(e.pointerId); }catch{}
-    });
-    window.addEventListener("pointerup", (e) => {
-      if(e.pointerType === "mouse" && e.button !== 0) return;
-      if(this._pointerId == null || e.pointerId !== this._pointerId) return;
-      this._pointerId = null;
       this.lift();
     });
-    window.addEventListener("pointercancel", (e) => {
-      if(this._pointerId == null || e.pointerId !== this._pointerId) return;
-      this._pointerId = null;
-      this.lift();
-    });
+
+    /* the screen is watched for size so the NPC circle hugs the palm */
+    if(typeof ResizeObserver === "function"){
+      new ResizeObserver(() => this._sizeRing()).observe(el.palmShell);
+    }
+    window.addEventListener("resize", () => this._sizeRing(), { passive: true });
 
     window.addEventListener("keydown", (e) => {
       if(this.el.layer.hidden) return;
@@ -157,10 +177,12 @@ export class Game {
         if(onControl && !playing) return;
         if(this.phase === "paused" || this.phase === "intro" || this.phase === "over" || this.phase === "pick") return;
         e.preventDefault();
-        if(!e.repeat){
-          this._pointerId = null;
-          this.press();
-        }
+        if(!e.repeat) this.lift();
+      }
+      if(e.code === "KeyC" && !e.ctrlKey && !e.metaKey && !e.altKey){
+        const tag = (e.target.tagName || "").toLowerCase();
+        if(tag === "input" || tag === "textarea") return;
+        if(this.phase !== "idle") this.cycleCamera();
       }
       if(e.code === "Escape"){
         if(this.phase === "paused") this.resume();
@@ -169,19 +191,154 @@ export class Game {
         else if(this.phase === "pick") this.exit();
       }
     });
-    window.addEventListener("keyup", (e) => {
-      if(this.el.layer.hidden) return;
-      if(e.code === "Space"){
-        const tag = (e.target.tagName || "").toLowerCase();
-        if(tag === "input" || tag === "textarea") return;
-        e.preventDefault();
-        this.lift();
-      }
-    });
 
     document.addEventListener("visibilitychange", () => {
       if(document.hidden && (this.phase === "call" || this.phase === "settle" || this.phase === "judged")) this.pause();
     });
+  }
+
+  /* ---------------------------------------------------------------- the ring */
+  _buildNpcs(){
+    const ring = this.el.npcRing;
+    const roster = this.el.npcRoster;
+    if(!ring || !roster) return;
+    ring.replaceChildren();
+    roster.replaceChildren();
+    this.npcs = NPCS.map((n) => {
+      const el = document.createElement("div");
+      el.className = "npc";
+      el.style.setProperty("--a", `${n.angle}deg`);
+      el.style.setProperty("--tone", n.tone);
+      el.innerHTML = npcMarkup(n.id);
+
+      const chip = document.createElement("span");
+      chip.className = "npc-chip";
+      chip.style.setProperty("--tone", n.tone);
+      chip.innerHTML = `<i></i>${n.name}`;
+
+      ring.append(el);
+      roster.append(chip);
+      return { ...n, el, chip, out: false, wrong: false };
+    });
+    this._sizeRing();
+  }
+
+  _sizeRing(){
+    const shell = this.el.palmShell;
+    if(!shell || !this.npcs) return;
+    const w = shell.clientWidth;
+    if(!w || w === this._sizedFor) return;
+    this._sizedFor = w;
+    const r = Math.round(w * 0.5 + 2);
+    this.npcs.forEach((n) => n.el.style.setProperty("--r", `${r}px`));
+  }
+
+  _clearNpcTimers(){
+    clearTimeout(this._npcTimer);
+    this._npcTimers.forEach(clearTimeout);
+    this._npcTimers = [];
+  }
+
+  _resetNpcs(){
+    this._clearNpcTimers();
+    if(!this.npcs) return;
+    this.npcs.forEach((n) => {
+      n.out = false;
+      n.wrong = false;
+      n.el.className = "npc";
+      n.el.style.transitionDelay = "";
+      n.chip.classList.remove("is-out");
+    });
+  }
+
+  _npcRound(w){
+    this._clearNpcTimers();
+    if(!this.npcs) return;
+    const live = this.npcs.filter((n) => !n.out);
+    live.forEach((n) => {
+      n.wrong = false;
+      n.el.style.transitionDelay = "";
+      const wrong = Math.random() > n.skill;
+      const lift = wrong ? !w.flies : w.flies;
+      n.wrong = wrong;
+      const delay = 240 + Math.random() * Math.min(820, this.windowMs * 0.55);
+      this._npcTimers.push(setTimeout(() => {
+        if(n.out || this.phase === "idle") return;
+        n.el.classList.remove("is-lift", "is-stay");
+        n.el.classList.add(lift ? "is-lift" : "is-stay");
+      }, delay));
+    });
+  }
+
+  /** Wrong fingers leave the circle once the name is settled. The state lands
+      at once so the next round cannot cancel it; only the fade is staggered. */
+  _settleNpcs(){
+    this._clearNpcTimers();
+    if(!this.npcs) return;
+    const guilty = this.npcs.filter((n) => !n.out && n.wrong);
+    guilty.forEach((n, i) => {
+      n.out = true;
+      n.el.style.transitionDelay = `${i * 0.16}s`;
+      n.el.classList.remove("is-lift", "is-stay");
+      n.el.classList.add("is-out");
+      n.chip.classList.add("is-out");
+    });
+    if(guilty.length && !this._lastMiss){
+      this.sound.fx("ui");
+      this.showToast(this.i18n.t("npcOut", { n: guilty[0].name }));
+    }
+    this.npcs.forEach((n) => { if(!n.out) n.el.classList.remove("is-lift", "is-stay"); });
+  }
+
+  /* ----------------------------------------------------------------- camera */
+  applyCamera(persist = true){
+    this.cam = clamp(this.cam || 0, 0, 2);
+    this.el.layer.dataset.cam = String(this.cam);
+    if(persist) store.set("camera", this.cam);
+    const name = this.i18n.t(CAM_KEYS[this.cam]);
+    const label = `${this.i18n.t("camera")} · ${name}`;
+    if(this.el.hudCam){
+      this.el.hudCam.title = label;
+      this.el.hudCam.setAttribute("aria-label", label);
+    }
+    this.vision.rate = CAM_RATES[this.cam];
+    this.vision.angle = CAM_ANGLES[this.cam];
+  }
+
+  cycleCamera(){
+    this.cam = ((this.cam || 0) + 1) % 3;
+    this.applyCamera();
+    this.sound.fx("ui");
+    this.showToast(this.i18n.t("cameraToast", { name: this.i18n.t(CAM_KEYS[this.cam]) }));
+  }
+
+  /* ------------------------------------------------------------------ pace */
+  setPace(pace){
+    if(!PACES[pace]) return;
+    if(pace === store.get("pace")){
+      this.updatePaceUI();
+      return;
+    }
+    store.set("pace", pace);
+    this.updatePaceUI();
+    this.sound.fx("ui");
+  }
+
+  updatePaceUI(){
+    const pace = PACES[store.get("pace")] ? store.get("pace") : "normal";
+    document.querySelectorAll("[data-pace]").forEach((btn) => {
+      const on = btn.dataset.pace === pace;
+      btn.classList.toggle("is-on", on);
+      btn.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  /* ----------------------------------------------------------- court theme */
+  applyModeTheme(){
+    if(!this.el.layer) return;
+    this.el.layer.dataset.mode = this.mode;
+    const use = this.el.playBird && this.el.playBird.querySelector("use");
+    if(use) use.setAttribute("href", `#${MODE_BIRD[this.mode] || "i-crane"}`);
   }
 
   /* -------------------------------------------------------------- lifecycle */
@@ -200,8 +357,9 @@ export class Game {
     this._run++;
     clearTimeout(this._countTimer);
     clearTimeout(this._toastTimer);
+    this._clearNpcTimers();
     this.phase = "pick";
-    this.fingerDown = false;
+    this.fingerDown = true;
     this._pointerId = null;
     this._vision = null;
     this.vision.hide();
@@ -212,11 +370,13 @@ export class Game {
     this.el.pause.hidden = true;
     this.el.over.hidden = true;
     this.el.countdown.hidden = true;
-    this.el.palm.classList.remove("is-down", "is-up");
+    this.restFinger();
     this.el.toast.classList.remove("show");
     this.el.visionStage.hidden = true;
     this.el.call.classList.remove("is-fly", "is-stay", "is-miss", "is-calling", "is-past");
     this.sound.duck(false);
+    this.applyModeTheme();
+    this.updatePaceUI();
     if(typeof this.onBest === "function") this.onBest();
   }
 
@@ -242,7 +402,7 @@ export class Game {
     this.el.word.textContent = "चिड़िया";
     this.el.sub.textContent = "chidiya";
     this.el.kicker.firstElementChild.textContent = "";
-    this.el.palmHint.textContent = this.i18n.t("getReady");
+    this.el.palmHint.textContent = this.i18n.t("fingerPlaced");
     if(this.mode === "maya"){
       this.el.visionStage.hidden = false;
       this.el.visionStage.classList.remove("is-trick", "is-true", "is-verdict");
@@ -253,6 +413,9 @@ export class Game {
 
   /** Re-render the intro sheet after a language switch. */
   refreshIntro(){
+    this.applyCamera(false);
+    this.applyModeTheme();
+    this.updatePaceUI();
     if(this.phase === "intro") this.showIntro();
     else if(this.phase === "pick"){
       this.el.pick.hidden = false;
@@ -287,8 +450,9 @@ export class Game {
     this._run++;
     clearTimeout(this._countTimer);
     clearTimeout(this._toastTimer);
+    this._clearNpcTimers();
     this.phase = "idle";
-    this.fingerDown = false;
+    this.fingerDown = true;
     this._pointerId = null;
     this._vision = null;
     this.vision.hide();
@@ -323,10 +487,12 @@ export class Game {
     this.misses = [];
     this.firstWord = true;
     this.word = null;
-    this.fingerDown = false;
+    this.fingerDown = true;
     this._vision = null;
     this.vision.hide();
+    this._resetNpcs();
     this.el.layer.classList.toggle("is-maya", this.mode === "maya");
+    this.applyModeTheme();
     this.el.visionStage.hidden = this.mode !== "maya";
     this.el.visionStage.classList.remove("is-trick", "is-true", "is-verdict");
     this.el.visionCaption.textContent = "";
@@ -336,10 +502,9 @@ export class Game {
     this.el.flock.replaceChildren();
     this.el.verdict.className = "call-verdict";
     this.el.call.classList.remove("is-fly", "is-stay", "is-miss", "is-calling", "is-past");
-    this.el.palm.classList.remove("is-down", "is-up");
-    this.el.palm.setAttribute("aria-pressed", "false");
+    this.restFinger();
     this._pointerId = null;
-    this.el.palmHint.textContent = this.i18n.t("holdPalm");
+    this.el.palmHint.textContent = this.i18n.t("fingerPlaced");
     this.el.palmHint.classList.remove("is-alert");
     this.el.toast.classList.remove("show", "bad", "good");
     this.el.speed.style.width = "0%";
@@ -385,7 +550,6 @@ export class Game {
   /* ---------------------------------------------------------------- round */
   startCall(){
     if(this.phase === "over" || this.phase === "idle" || this.phase === "pick") return;
-    if(!this.fingerDown){ this.phase = "settle"; this.nextAt = 0; this.promptSettle(); return; }
     const first = this.calls === 0;
     const w = this.firstWord ? (WORDS.find(x => x.id === "chidiya") || WORDS[0]) : this.bag.next(this.recent);
     this.firstWord = false;
@@ -399,6 +563,7 @@ export class Game {
     this.recent = [w.id, ...this.recent].slice(0, 5);
     this._vision = this.pickVision(w, first);
 
+    this.restFinger();
     this.el.call.classList.remove("is-fly", "is-stay", "is-miss", "is-past", "is-calling");
     void this.el.call.offsetWidth;
     this.el.call.classList.add("is-calling");
@@ -411,7 +576,7 @@ export class Game {
     this.el.meter.style.transform = "scaleX(1)";
     this.el.meter.classList.remove("warn");
     this.el.verdict.className = "call-verdict";
-    this.el.palmHint.textContent = "";
+    this.el.palmHint.textContent = this.i18n.t("fingerPlaced");
     this.el.palmHint.classList.remove("is-alert");
     this.el.speed.style.width = `${this.speedLevel() * 11}%`;
 
@@ -425,6 +590,7 @@ export class Game {
       this.el.visionStage.hidden = true;
     }
 
+    this._npcRound(w);
     this.pulsePalm();
     this.sound.fx("tick");
   }
@@ -449,55 +615,45 @@ export class Game {
   }
 
   windowFor(){
-    if(this.mode === "zen") return 1900;
-    const base = this.mode === "sprint" ? 1180 : 1380;
-    const floor = this.mode === "sprint" ? 520 : 600;
-    return Math.max(floor, base - this.correct * 34);
+    const pace = PACES[store.get("pace")] || 1;
+    if(this.mode === "zen") return Math.round(1800 * pace);
+    /* Baithak and Bijli keep the courtyard brisk */
+    const base = this.mode === "sprint" ? 880 : 1000;
+    const floor = this.mode === "sprint" ? 440 : 540;
+    return Math.round(Math.max(floor, base - this.correct * 28) * pace);
   }
 
   speedLevel(){
-    const base = this.mode === "sprint" ? 1180 : 1380;
-    return clamp(1 + Math.round((base - this.windowMs) / 105), 1, 9);
+    return clamp(1 + Math.floor(this.correct / 3), 1, 9);
   }
 
-  press(pointerId = null){
-    if(this.phase === "intro" || this.phase === "over" || this.phase === "idle" || this.phase === "paused" || this.phase === "pick") return;
-    if(this.fingerDown) return;
+  /** Put the index finger back on the palm without asking the player. */
+  restFinger(){
     this.fingerDown = true;
-    this._pointerId = pointerId;
+    this._pointerId = null;
     this.el.palm.classList.remove("is-up");
     this.el.palm.classList.add("is-down");
-    this.el.palm.setAttribute("aria-pressed", "true");
-    try{ navigator.vibrate && navigator.vibrate(8); }catch{}
-    if(this.phase === "settle"){
-      this.nextAt = this.now() + 120;
-      this.el.palmHint.textContent = this.i18n.t("holdPalm");
-      this.el.palmHint.classList.remove("is-alert");
-    }
+    this.el.palm.setAttribute("aria-pressed", "false");
   }
 
+  /** The one gesture that matters: lift the finger, meaning "it flies". */
   lift(){
+    if(this.phase !== "call" || !this.word) return;
     if(!this.fingerDown) return;
     this.fingerDown = false;
-    this._pointerId = null;
     this.el.palm.classList.remove("is-down");
     this.el.palm.classList.add("is-up");
-    this.el.palm.setAttribute("aria-pressed", "false");
+    this.el.palm.setAttribute("aria-pressed", "true");
     try{ navigator.vibrate && navigator.vibrate(10); }catch{}
-    if(this.phase === "call"){
-      if(this.word && this.word.flies) this.judge(true);
-      else this.judge(false);
-    }else if(this.phase === "settle"){
-      this.nextAt = 0;
-      this.promptSettle();
-    }
+    this.judge(!!this.word.flies);
   }
 
   promptSettle(){
-    this.el.palmHint.textContent = this.fingerDown ? this.i18n.t("holdPalm") : this.i18n.t("placeFinger");
-    this.el.palmHint.classList.toggle("is-alert", !this.fingerDown);
-    this.el.kicker.firstElementChild.textContent = this.fingerDown ? "" : this.i18n.t("placeFinger");
+    this.el.palmHint.textContent = this.i18n.t("holdPalm");
+    this.el.palmHint.classList.remove("is-alert");
+    this.el.kicker.firstElementChild.textContent = "";
     if(this.word) this.el.word.classList.add("is-past");
+    this.restFinger();
   }
 
   judge(hit){
@@ -582,6 +738,7 @@ export class Game {
 
   endCall(){
     if(this.phase !== "judged") return;
+    this._settleNpcs();
     if((this.mode === "classic" || this.mode === "maya") && this.lives <= 0) return this.finish();
     if(this.mode === "sprint" && this.timeLeft <= 0) return this.finish("time");
     this.phase = "settle";
@@ -593,7 +750,7 @@ export class Game {
       this.vision.hide();
     }
     const gap = this.mode === "zen" ? 380 : 240;
-    this.nextAt = this.fingerDown ? this.now() + gap : 0;
+    this.nextAt = this.now() + gap;
     this._vision = null;
     this.promptSettle();
   }
@@ -602,6 +759,7 @@ export class Game {
     this.phase = "over";
     this.sound.fx("over");
     this.sound.duck(true);
+    this._clearNpcTimers();
     this.vision.hide();
     this.el.visionStage.hidden = true;
     this.el.countdown.hidden = true;
@@ -709,7 +867,7 @@ export class Game {
       const wait = (this.mode === "maya" && this._vision?.trick) ? 760 : this._lastMiss ? 520 : 360;
       if(t - this.judgedAt >= wait) this.endCall();
     }else if(this.phase === "settle"){
-      if(this.nextAt && t >= this.nextAt && this.fingerDown) this.startCall();
+      if(this.nextAt && t >= this.nextAt) this.startCall();
     }
   }
 

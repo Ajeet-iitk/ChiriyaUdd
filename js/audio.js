@@ -341,6 +341,26 @@ export class Sound {
         this.pluck(SCALE[7], t + 0.1, 0.05, 1.4, this.sfxBus);
         this.pluck(SCALE[4] * 2, t + 0.22, 0.04, 1.8, this.sfxBus);
         break;
+      case "chirp": {
+        const base = 1250 + Math.random() * 700;
+        this._sweep(t, base, base * 1.45, 0.09, 0.032);
+        this._sweep(t + 0.11, base * 1.1, base * 1.7, 0.08, 0.026);
+        if(Math.random() < 0.6) this._sweep(t + 0.22, base * 1.25, base * 0.95, 0.1, 0.02);
+        break;
+      }
+      case "wings": {
+        for(let i = 0; i < 6; i++){
+          this._flap(t + i * 0.075, 0.05 - i * 0.004, 620 + i * 130);
+        }
+        break;
+      }
+      case "peck":
+        this._click(t, 0.06, 1900 + Math.random() * 500);
+        this._blip(t, 320, 0.028, 0.07);
+        break;
+      case "grain":
+        for(let i = 0; i < 4; i++) this._click(t + i * 0.045, 0.022, 2600 + Math.random() * 1200);
+        break;
       default: break;
     }
   }
@@ -364,6 +384,22 @@ export class Sound {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
     s.connect(bp).connect(g).connect(this.sfxBus);
     s.start(t); s.stop(t + 0.05);
+  }
+
+  /** One soft wingbeat — noise through a moving band-pass. */
+  _flap(t, gain = 0.04, freq = 700){
+    const ctx = this.ctx;
+    const s = ctx.createBufferSource(); s.buffer = this.noise;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass";
+    bp.frequency.setValueAtTime(freq, t);
+    bp.frequency.exponentialRampToValueAtTime(freq * 0.5, t + 0.16);
+    bp.Q.value = 0.8;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    s.connect(bp).connect(g).connect(this.sfxBus);
+    s.start(t); s.stop(t + 0.18);
   }
 
   _clap(t, gain){

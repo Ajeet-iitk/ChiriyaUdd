@@ -11,6 +11,8 @@ import { Game } from "./play.js";
 import { store } from "./store.js";
 import { mountHand } from "./hand.js";
 import { Vision, visualKey } from "./vision.js";
+import { Meadow } from "./meadow.js";
+import { initCursorBirds, initPhoenix, navFly } from "./cursor.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -18,19 +20,20 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 /* ---------- boot ---------- */
 document.documentElement.dataset.theme = store.get("theme") || "dark";
 document.documentElement.dataset.sound = store.get("sound") ? "on" : "off";
-document.documentElement.dataset.music = store.get("music") ? "on" : "off";
 
 const i18n = makeI18n();
 const sound = new Sound();
 const scene = new Scene($("#sky"));
 const game = new Game({ sound, scene, i18n });
+const meadow = new Meadow({ sound, i18n, onToast: (text) => showToast(text) });
 
 sound.setMusicVol(store.get("musicVol") ?? 0.38);
 sound.setSfxVol(store.get("sfxVol") ?? 0.72);
 sound.setSfx(!!store.get("sound"));
-sound.setMusic(!!store.get("sound") && !!store.get("music"));
-$("#musicBtn")?.setAttribute("aria-pressed", String(!!store.get("sound") && !!store.get("music")));
-$("#soundBtn")?.setAttribute("aria-pressed", String(!!store.get("sound")));
+sound.setMusic(!!store.get("sound"));
+
+const clamp01 = (n) => Math.max(0, Math.min(1, Number(n) || 0));
+let audioArmed = false;
 
 /* ---------- theme ---------- */
 let fadeTimer = null;
@@ -61,6 +64,8 @@ function applyLang(lang, persist = true){
   renderAlmanacDemo();
   renderRuleCopy();
   updateArt();
+  meadow.refresh();
+  applyAudio();
   if(!$("#view-play").hidden) game.refreshIntro();
 }
 
@@ -350,36 +355,119 @@ function startVisionDemo(){
   setInterval(() => { if(!$("#view-explore").hidden) step(); }, 3600);
 }
 
-/* ---------- sound controls ---------- */
-function applySound(){
-  const s = !!store.get("sound");
-  const m = !!store.get("music");
-  document.documentElement.dataset.sound = s ? "on" : "off";
-  document.documentElement.dataset.music = m ? "on" : "off";
-  const musicBtn = $("#musicBtn");
-  const soundBtn = $("#soundBtn");
-  if(musicBtn) musicBtn.setAttribute("aria-pressed", String(s && m));
-  if(soundBtn) soundBtn.setAttribute("aria-pressed", String(s));
-  sound.setSfx(s);
-  sound.setMusic(s && m);
-  if(s && m){
+/* ---------- audio: one icon, one console ---------- */
+function applyAudio(){
+  const on = !!store.get("sound");
+  const mv = clamp01(store.get("musicVol") ?? 0.38);
+  const sv = clamp01(store.get("sfxVol") ?? 0.72);
+
+  sound.setMusicVol(mv);
+  sound.setSfxVol(sv);
+  sound.setSfx(on);
+  sound.setMusic(on && mv > 0.001);
+
+  document.documentElement.dataset.sound = on ? "on" : "off";
+  document.documentElement.dataset.audio = on ? "on" : "off";
+
+  const btn = $("#audioBtn");
+  const panel = $("#audioPanel");
+  if(btn){
+    btn.setAttribute("aria-pressed", String(on));
+    btn.setAttribute("aria-expanded", String(!!panel && !panel.hidden));
+  }
+
+  const all = $("#audioAll");
+  if(all){
+    const span = all.querySelector("span") || all;
+    span.dataset.i18n = on ? "muteAll" : "unmuteAll";
+    span.textContent = i18n.t(on ? "muteAll" : "unmuteAll");
+    all.classList.toggle("is-off", !on);
+  }
+
+  [
+    ["#panelMusicVol", "#musicVol", Math.round(mv * 100)],
+    ["#panelSfxVol", "#sfxVol", Math.round(sv * 100)],
+  ].forEach(([a, b, v]) => {
+    [$(a), $(b)].forEach(el => {
+      if(el && document.activeElement !== el) el.value = v;
+    });
+  });
+
+  if(on && mv > 0.001 && audioArmed){
     sound.ensure();
     sound.startMusic();
   }
 }
 
-function toggleSound(){
+function setPanel(open){
+  const panel = $("#audioPanel");
+  const btn = $("#audioBtn");
+  if(!panel) return;
+  panel.hidden = !open;
+  if(btn) btn.setAttribute("aria-expanded", String(!!open));
+}
+
+function toggleAudio(){
+  audioArmed = true;
   store.set("sound", !store.get("sound"));
-  applySound();
-  if(store.get("sound")) sound.fx("ui");
+  applyAudio();
+  if(!store.get("sound")) sound.stopMusic();
+  else sound.fx("ui");
   showToast(i18n.t(store.get("sound") ? "soundOn" : "soundOff"));
 }
 
-function toggleMusic(){
-  store.set("music", !store.get("music"));
-  if(store.get("music") && !store.get("sound")) store.set("sound", true);
-  applySound();
-  showToast(i18n.t(store.get("music") ? "musicOn" : "musicOff"));
+function bindAudio(){
+  const panel = $("#audioPanel");
+  const btn = $("#audioBtn");
+  setPanel(false);
+
+  if(btn) btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = !!panel && panel.hidden;
+    setPanel(open);
+    if(open) applyAudio();
+    sound.fx("ui");
+  });
+
+  document.addEventListener("click", (e) => {
+    if(!panel || panel.hidden) return;
+    if(e.target.closest(".audio-wrap")) return;
+    setPanel(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && panel && !panel.hidden){
+      setPanel(false);
+      if(btn) btn.focus();
+    }
+  });
+
+  const all = $("#audioAll");
+  if(all) all.addEventListener("click", () => { toggleAudio(); sound.fx("ui"); });
+
+  const pm = $("#panelMusicVol");
+  if(pm) pm.addEventListener("input", () => {
+    const v = clamp01(pm.value / 100);
+    store.set("musicVol", v);
+    if(v > 0 && !store.get("sound")) store.set("sound", true);
+    applyAudio();
+  });
+
+  const ps = $("#panelSfxVol");
+  if(ps) ps.addEventListener("input", () => {
+    const v = clamp01(ps.value / 100);
+    store.set("sfxVol", v);
+    if(v > 0 && !store.get("sound")) store.set("sound", true);
+    applyAudio();
+  });
+
+  // the pause-sheet sliders share the same store values
+  [["#musicVol", "musicVol"], ["#sfxVol", "sfxVol"]].forEach(([sel, key]) => {
+    const el = $(sel);
+    if(el) el.addEventListener("input", () => {
+      store.set(key, clamp01(el.value / 100));
+      applyAudio();
+    });
+  });
 }
 
 /* ---------- toast ---------- */
@@ -404,6 +492,8 @@ function route(){
   const playing = name === "play";
 
   document.body.classList.toggle("is-playing", playing);
+  document.body.dataset.view = name;
+  meadow.setActive(name === "home");
   VIEWS.forEach(v => {
     const el = $(`#view-${v}`);
     if(el) el.hidden = v !== name;
@@ -421,9 +511,13 @@ function route(){
   }
 
   if(playing){
-    if(game.phase === "idle") game.open(submode);
-    else if(submode && game.mode !== submode) game.open(submode);
-    else if(!submode && (game.phase === "intro" || game.phase === "pick")) game.showPicker();
+    if(submode && (game.phase === "idle" || game.phase === "pick" || game.mode !== submode)){
+      game.open(submode);
+    }else if(game.phase === "idle"){
+      game.open(null);
+    }else if(!submode && (game.phase === "intro" || game.phase === "pick")){
+      game.showPicker();
+    }
   }else if(game.phase !== "idle"){
     game.stop();
   }
@@ -454,12 +548,19 @@ function init(){
   mountHand($("#artHand"), "hero");
   mountHand($("#ruleHand"), "rule");
   seedHeroBirds();
+  meadow.mount();
   startArtCycle();
   buildKeys();
   bindRuleDemo();
   startViz();
   startVisionDemo();
   refreshBests();
+  bindAudio();
+  applyAudio();
+  initCursorBirds({
+    onChirp: () => { sound.ensure(); sound.fx("chirp"); },
+  });
+  initPhoenix();
   $("#year").textContent = new Date().getFullYear();
   $("#factWords").textContent = WORD_COUNT;
 
@@ -475,9 +576,11 @@ function init(){
     applyLang(LANGS[(idx + 1) % LANGS.length].id);
     sound.fx("ui");
   });
-  $("#soundBtn").addEventListener("click", toggleSound);
-  const musicBtn = $("#musicBtn");
-  if(musicBtn) musicBtn.addEventListener("click", toggleMusic);
+
+  // nav birds leave a little feather-trail when a link is taken
+  $$(".nav a").forEach(link => {
+    link.addEventListener("click", () => navFly(link));
+  });
 
   // modes
   $$("[data-play-mode]").forEach(btn => {
@@ -524,23 +627,30 @@ function init(){
     if(e.code === "KeyM" && !e.ctrlKey && !e.metaKey && !e.altKey){
       const tag = (e.target.tagName || "").toLowerCase();
       if(tag === "input" || tag === "textarea") return;
-      toggleSound();
+      toggleAudio();
     }
   });
 
   // first gesture wakes the audio
   const wake = () => {
+    audioArmed = true;
     sound.ensure();
-    if(store.get("sound") && store.get("music")) sound.startMusic();
+    if(store.get("sound") && (store.get("musicVol") ?? 0.38) > 0.001) sound.startMusic();
     window.removeEventListener("pointerdown", wake);
     window.removeEventListener("keydown", wake);
   };
   window.addEventListener("pointerdown", wake, { once: true });
   window.addEventListener("keydown", wake, { once: true });
 
-  // topbar shadow
+  // topbar shadow + the meadow tucks itself away as you read on
   const top = $("#topbar");
-  const onScroll = () => top.classList.toggle("is-stuck", window.scrollY > 12);
+  const onScroll = () => {
+    const y = window.scrollY || 0;
+    top.classList.toggle("is-stuck", y > 12);
+    const away = y > Math.min(240, window.innerHeight * 0.34);
+    document.body.classList.toggle("is-scrolled-away", away);
+    meadow.setActive(!away && document.body.dataset.view === "home");
+  };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
