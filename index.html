@@ -102,7 +102,16 @@
 </div>
 
 <div class="meadow" id="meadow" aria-hidden="true">
+  <div class="meadow-glow"></div>
+  <div class="meadow-ridge ridge-far"></div>
+  <div class="meadow-mist mist-a"></div>
+  <div class="meadow-ridge ridge-mid"></div>
+  <div class="meadow-mist mist-b"></div>
+  <div class="meadow-far" id="meadowFar"></div>
   <div class="meadow-birds" id="meadowBirds"></div>
+  <div class="meadow-ridge ridge-near"></div>
+  <div class="meadow-grass" id="meadowGrass"></div>
+  <div class="meadow-motes" id="meadowMotes"></div>
   <div class="meadow-grain" id="meadowGrain"></div>
 </div>
 
@@ -180,55 +189,73 @@
           <a class="btn btn-primary has-phoenix" href="#play" data-start>
             <span data-i18n="heroCta">Enter the baithak</span>
             <svg><use href="#i-arrow"/></svg>
-            <span class="phoenix" id="heroPhoenix" aria-hidden="true">
-              <svg viewBox="0 0 16 16" shape-rendering="crispEdges" focusable="false">
-                <g class="phoenix-tail">
-                  <rect x="4" y="8" width="1" height="1" fill="#f0708c"/>
-                  <rect x="3" y="9" width="1" height="1" fill="#ff8a4c"/>
-                  <rect x="2" y="10" width="1" height="1" fill="#f0708c"/>
-                  <rect x="1" y="11" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="2" y="11" width="1" height="1" fill="#f0708c"/>
-                  <rect x="3" y="12" width="1" height="1" fill="#ff8a4c"/>
-                  <rect x="2" y="12" width="1" height="1" fill="#7a3a54"/>
-                  <rect x="1" y="13" width="1" height="1" fill="#f0708c"/>
-                  <rect x="2" y="13" width="1" height="1" fill="#ff8a4c"/>
-                  <rect x="3" y="13" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="3" y="14" width="1" height="1" fill="#f0708c"/>
-                  <rect x="4" y="14" width="1" height="1" fill="#7a3a54"/>
+            <span class="phoenix" id="heroPhoenix" aria-hidden="true" data-phase="alive">
+              <span class="phoenix-aura"></span>
+              <svg viewBox="0 0 72 84" focusable="false">
+                <defs>
+                  <linearGradient id="phxBody" x1="24" y1="8" x2="52" y2="62" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#fff3cf"/>
+                    <stop offset=".4" stop-color="#ffd06f"/>
+                    <stop offset=".76" stop-color="#ff8a4c"/>
+                    <stop offset="1" stop-color="#e0517a"/>
+                  </linearGradient>
+                  <linearGradient id="phxWing" x1="10" y1="20" x2="62" y2="56" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#ff9a5a"/>
+                    <stop offset=".55" stop-color="#f0708c"/>
+                    <stop offset="1" stop-color="#b07df0"/>
+                  </linearGradient>
+                  <linearGradient id="phxTail" x1="10" y1="46" x2="48" y2="84" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#ffdca0"/>
+                    <stop offset=".48" stop-color="#ff8a4c"/>
+                    <stop offset="1" stop-color="#f0708c"/>
+                  </linearGradient>
+                </defs>
+                <g class="phoenix-art">
+                  <g class="phoenix-tail">
+                    <path d="M40 47C33 57 23 65 10 70c8 6 20 4 29-5 6-5 9-11 9-17z" fill="url(#phxTail)"/>
+                    <path d="M43 49C39 61 33 71 23 79c10 2 19-4 25-14 3-6 4-12 2-18z" fill="url(#phxTail)" opacity=".92"/>
+                    <path d="M46 48C48 61 46 73 41 82c9-2 15-11 16-21 0-7-2-12-5-15z" fill="url(#phxTail)" opacity=".8"/>
+                    <path d="M34 54c-3 6-8 11-14 15M38 56c-2 8-5 14-9 20M45 55c1 9 0 16-2 23"
+                      fill="none" stroke="#ffe7b4" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="round"/>
+                  </g>
+                  <path class="phoenix-wing l" d="M44 33C32 26 21 22 9 23c6 9 15 16 27 21z" fill="url(#phxWing)" opacity=".82"/>
+                  <path d="M45 35c8-8 16-12 25-12-3 10-10 17-20 22z" fill="url(#phxWing)"/>
+                  <path class="phoenix-wing r" d="M46 37c7-5 13-8 19-9" fill="none" stroke="#ffe7b4" stroke-opacity=".55" stroke-width="1.2" stroke-linecap="round"/>
+                  <path d="M47 24c9 4 14 12 12 22-2 11-10 18-19 17-8 0-12-6-11-15 1-11 8-20 18-24z" fill="url(#phxBody)"/>
+                  <path d="M45 34c5 2 8 6 8 11" fill="none" stroke="#fff3cf" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+                  <g class="phoenix-head">
+                    <path d="M50 14c1-4 3-7 6-9M53 15c3-4 6-6 10-6M55 18c3-2 6-3 9-2"
+                      fill="none" stroke="url(#phxTail)" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="56" cy="5.5" r="1.4" fill="#ffd08a"/>
+                    <circle cx="63" cy="8.5" r="1.2" fill="#f0708c"/>
+                    <circle cx="64" cy="15.5" r="1" fill="#ffd08a"/>
+                    <path d="M48 21c0-6 4-10 10-10 5 0 9 4 9 9 0 5-4 8-9 8-6 0-10-2-10-7z" fill="url(#phxBody)"/>
+                    <path d="M66 19l7 2-7 3z" fill="#ffbe4d"/>
+                    <path d="M66 21l5 1" stroke="#a95a22" stroke-width=".6" stroke-linecap="round"/>
+                    <circle cx="60" cy="18" r="2.2" fill="#33122a"/>
+                    <g class="phoenix-pupil"><circle cx="60.4" cy="17.6" r=".85" fill="#fff4e2"/></g>
+                  </g>
+                  <g stroke="#ffbe4d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                    <path d="M39 61l-2 8m0 0-3 2m3-2 3 2"/>
+                    <path d="M45 60l1 8m0 0-3 2m3-2 3 2"/>
+                  </g>
                 </g>
-                <g class="phoenix-body">
-                  <rect x="7" y="6" width="4" height="1" fill="#ff8a4c"/>
-                  <rect x="6" y="7" width="5" height="1" fill="#ff8a4c"/>
-                  <rect x="5" y="8" width="6" height="1" fill="#ff8a4c"/>
-                  <rect x="4" y="9" width="7" height="1" fill="#ff8a4c"/>
-                  <rect x="5" y="10" width="5" height="1" fill="#ff8a4c"/>
-                  <rect x="5" y="11" width="4" height="1" fill="#ffc56e"/>
-                  <rect x="6" y="12" width="2" height="1" fill="#ff8a4c"/>
-                  <rect x="7" y="7" width="3" height="1" fill="#ffc56e"/>
-                  <rect x="7" y="8" width="2" height="1" fill="#fff2dc"/>
-                  <rect x="8" y="9" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="6" y="10" width="1" height="1" fill="#7a3a54"/>
-                  <rect x="7" y="10" width="1" height="1" fill="#7a3a54"/>
-                </g>
-                <g class="phoenix-head">
-                  <rect x="9" y="0" width="1" height="1" fill="#f0708c"/>
-                  <rect x="9" y="1" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="11" y="1" width="1" height="1" fill="#f0708c"/>
-                  <rect x="10" y="2" width="2" height="1" fill="#ffc56e"/>
-                  <rect x="12" y="2" width="1" height="1" fill="#ff8a4c"/>
-                  <rect x="10" y="3" width="2" height="1" fill="#ffc56e"/>
-                  <rect x="12" y="3" width="2" height="1" fill="#ff8a4c"/>
-                  <rect x="10" y="4" width="2" height="1" fill="#ffc56e"/>
-                  <rect x="10" y="5" width="2" height="1" fill="#ff8a4c"/>
-                  <g class="phoenix-pupil"><rect x="11" y="3" width="1" height="1" fill="#2a1220"/></g>
-                </g>
-                <g class="phoenix-legs">
-                  <rect x="8" y="13" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="10" y="13" width="1" height="1" fill="#ffc56e"/>
-                  <rect x="7" y="14" width="2" height="1" fill="#ffc56e"/>
-                  <rect x="9" y="14" width="2" height="1" fill="#ffc56e"/>
+                <g class="phoenix-ash">
+                  <ellipse cx="40" cy="76" rx="17" ry="4.2" fill="#6d5a64" opacity=".82"/>
+                  <ellipse cx="35" cy="74.4" rx="8" ry="3" fill="#8d7882" opacity=".75"/>
+                  <ellipse cx="48" cy="75" rx="5" ry="2.2" fill="#7c6771" opacity=".7"/>
+                  <circle cx="29" cy="74.4" r="1" fill="#ffb066"/>
+                  <circle cx="45" cy="75.5" r=".8" fill="#ffd08a"/>
+                  <circle cx="39" cy="73.4" r=".7" fill="#ff9a5a"/>
                 </g>
               </svg>
+              <span class="phoenix-sparks">
+                <i class="phx-spark" style="--sx:36%;--sy:20%;--sdel:.1s;--sdx:-9px"></i>
+                <i class="phx-spark" style="--sx:48%;--sy:14%;--sdel:.45s;--sdx:5px"></i>
+                <i class="phx-spark" style="--sx:58%;--sy:26%;--sdel:.8s;--sdx:10px"></i>
+                <i class="phx-spark" style="--sx:44%;--sy:32%;--sdel:1.1s;--sdx:-4px"></i>
+                <i class="phx-spark" style="--sx:52%;--sy:8%;--sdel:.65s;--sdx:7px"></i>
+              </span>
               <span class="phoenix-flame"></span>
             </span>
           </a>

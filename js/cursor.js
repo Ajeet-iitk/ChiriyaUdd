@@ -1,6 +1,6 @@
 /* ==========================================================================
    Kingdom weather — a hummingbird streak follows the cursor, clicks release
-   a small flock, the pixel phoenix watches the pointer, and nav birds fly.
+   a small flock, the phoenix burns and rises from its ash, and nav birds fly.
    Desktop / fine-pointer only, and quiet under reduced motion.
    ========================================================================== */
 
@@ -89,7 +89,7 @@ export function initCursorBirds({ onChirp } = {}){
   }, { passive: true });
 }
 
-/** The pixel phoenix turns its eye toward the pointer. */
+/** The phoenix turns its eye toward the pointer, then burns and returns. */
 export function initPhoenix(){
   const phx = document.getElementById("heroPhoenix");
   if(!phx) return;
@@ -112,6 +112,24 @@ export function initPhoenix(){
     phx.style.setProperty("--phx-y", "0px");
     phx.style.setProperty("--phx-tilt", "0deg");
   }, { passive: true });
+
+  if(still()) return;
+
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const cycle = async () => {
+    for(;;){
+      phx.dataset.phase = "alive";
+      await wait(rnd(10000, 15000));
+      if(document.hidden){ await wait(5000); continue; }
+      phx.dataset.phase = "burning";
+      await wait(3000);
+      phx.dataset.phase = "ash";
+      await wait(3800);
+      phx.dataset.phase = "rising";
+      await wait(2300);
+    }
+  };
+  cycle();
 }
 
 /** A matching bird flits across the top bar when a nav link is chosen. */
