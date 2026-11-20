@@ -64,9 +64,9 @@ Scores, bests, theme, language, pace, camera and volume all live in `localStorag
 
 The frame around the game is a small kingdom of birds, not a skin.
 
-- **A meadow on the home screen.** Sarus cranes, a peacock, an ostrich and ducks stroll the bottom of the courtyard. Click one to shoo it; **Feed** scatters grain and the flock wanders over to peck. **Shoo**, or a shake of your phone, sends every bird up in a flurry and they drift back a little later. Shake needs motion permission on iOS; the button is the desktop fallback.
-- **A pixel phoenix on the Play button.** It perches on the corner, turns its head toward your cursor, and flickers its tail. On a phone it simply sits and watches.
-- **Hummingbirds after the pointer.** On a fine pointer, small hummingbirds streak after the cursor and burst out of every click. Both are disabled in play and under `prefers-reduced-motion`.
+- **A meadow in the background.** Seven birds across three depths — sarus cranes, a peacock, an ostrich, egrets, ducks and a sparrow — live behind the page, softened by distance, layered hills, swaying grass, drifting mist and rising motes. They stroll, feed and peck, and every so often one takes a short flight across the courtyard. **Feed** scatters grain and the flock wanders over to peck. **Shoo**, or a shake of your phone, sends every bird up in a flurry and they drift back a little later. Shake needs motion permission on iOS; the button is the desktop fallback.
+- **A phoenix on the Play button.** It perches on the corner, turns its head toward your cursor and flickers its tail. Every so often it catches fire, collapses into a small heap of ash and embers, then rises again out of it — the old story, played on a loop.
+- **Hummingbirds after the pointer.** On a fine pointer, small hummingbirds streak after the cursor and burst out of every click. They are strictly monochrome: black in daylight, pale at night. Both are disabled in play and under `prefers-reduced-motion`.
 - **Birds in the chrome.** The brand carries a crown, every navbar link has its own bird, and each mode card and court carries its bird: crane, falcon, penguin, peacock.
 
 ## Screenshots
@@ -134,8 +134,8 @@ js/
   play.js                game state machine, pace, camera, NPC fingers, Maya decoys
   hand.js                index-finger SVG hand + NPC finger art
   vision.js              flat-shaded 3D models and canvas renderer
-  meadow.js              home birds, feeding, shooing, shake-to-scatter
-  cursor.js              hummingbird trail, click burst, pixel phoenix, nav fly-by
+  meadow.js              layered home meadow, depth, drifting scenery, flight, feeding
+  cursor.js              monochrome hummingbird trail, click burst, phoenix cycle, nav fly-by
   main.js                routing, themes, languages, audio console, explore demos, almanac
   store.js               localStorage settings + best scores
 assets/                  favicon, app icons, social card

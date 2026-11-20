@@ -1420,13 +1420,13 @@ body.is-playing .meadow-dock{opacity:0;pointer-events:none;transform:translate(-
 /* ---------- the phoenix above the Play button ---------- */
 .btn-primary.has-phoenix{position:relative;overflow:visible}
 .phoenix{
-  position:absolute;right:14px;top:-66px;width:96px;height:69px;image-rendering:pixelated;
+  position:absolute;right:0;top:-40px;width:68px;height:49px;image-rendering:pixelated;
   z-index:3;pointer-events:none;transform-origin:50% 100%;
   filter:drop-shadow(0 3px 0 rgba(0,0,0,.25));
   animation:phoenixBob 1.6s steps(1,end) infinite;
 }
-@media (max-width:480px){.phoenix{width:80px;height:58px;right:8px;top:-55px}}
-.phoenix svg{position:relative;z-index:2;display:block;width:100%;height:100%;overflow:visible}
+.phoenix svg{position:relative;z-index:2;display:block;width:100%;height:100%;overflow:visible;shape-rendering:crispEdges}
+.phoenix svg *{stroke:none;stroke-width:0}
 .phoenix-art{transform-box:fill-box;transform-origin:50% 92%}
 .phoenix-tail{transform-box:fill-box;transform-origin:74% 10%;animation:phoenixTail 3.6s ease-in-out infinite}
 .phoenix-head{transform-box:fill-box;transform-origin:44% 88%;transform:rotate(var(--phx-tilt,0deg));transition:transform .3s var(--ease)}
@@ -1665,9 +1665,13 @@ html[data-theme="light"] #view-play[data-mode="maya"]{--court-ink:#6a35b0}
 .cursor-birds{position:fixed;inset:0;z-index:400;pointer-events:none;overflow:hidden}
 .hum{
   position:fixed;left:0;top:0;width:26px;height:26px;
-  color:#0b0a12;pointer-events:none;
-  filter:drop-shadow(0 0 1.4px rgba(255,245,230,.55)) drop-shadow(0 3px 5px rgba(0,0,0,.35));
+  color:#f6f1e8;pointer-events:none;
+  filter:drop-shadow(0 0 1.4px rgba(10,8,16,.85)) drop-shadow(0 3px 5px rgba(0,0,0,.35));
   will-change:transform,opacity;
+}
+html[data-theme="light"] .hum{
+  color:#141018;
+  filter:drop-shadow(0 0 1.4px rgba(255,250,240,.85)) drop-shadow(0 3px 5px rgba(0,0,0,.22));
 }
 .hum svg{display:block;width:100%;height:100%;overflow:visible}
 .hum .hum-wing{transform-box:fill-box;transform-origin:72% 70%;animation:humWing .11s linear infinite alternate}
@@ -1686,11 +1690,14 @@ html[data-theme="light"] #view-play[data-mode="maya"]{--court-ink:#6a35b0}
 
 /* ---------- responsive / stillness ---------- */
 @media (max-width:780px){
-  .phoenix{width:72px;height:52px;top:-49px;right:6px}
+  .phoenix{width:56px;height:40px;top:-26px;right:3px}
   .mode-bird{width:108px;height:108px;right:-18px;bottom:-18px;opacity:.11}
   .play-bird{width:92px;opacity:.09}
   .pace-row{flex-direction:column;align-items:flex-start;gap:7px}
   .nav-bird{display:none}
+}
+@media (max-width:480px){
+  .phoenix{width:52px;height:37px;top:-22px;right:2px}
 }
 @media (prefers-reduced-motion:reduce){
   .phoenix,.phoenix-tail,.phoenix-wing,.phoenix-art,.phoenix-flame,.phoenix-aura,.phx-spark,.brand-crown,.mode-bird,.play-bird,.play-weather,.nav-bird,.hum,.hum .hum-wing{animation:none !important}

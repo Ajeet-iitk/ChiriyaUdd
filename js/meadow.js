@@ -247,13 +247,13 @@ const FAR_BIRD = `
 </svg>`;
 
 const TYPES = {
-  crane:     { nameKey: "birdCrane",   svg: CRANE,      h: 122, by: 3,  speed: 8,  z: 4, x: .16, depth: "mid" },
-  peacock:   { nameKey: "birdPeacock", svg: PEACOCK,    h: 104, by: 1,  speed: 6.5,z: 5, x: .56, depth: "mid" },
-  ostrich:   { nameKey: "birdOstrich", svg: OSTRICH,    h: 134, by: -2, speed: 7,  z: 7, x: .82, depth: "near" },
-  egret:     { nameKey: "birdEgret",   svg: EGRET,      h: 76,  by: 12, speed: 6,  z: 2, x: .64, depth: "far" },
-  duck:      { nameKey: "birdDuck",    svg: DUCK,       h: 58,  by: 1,  speed: 14, z: 8, x: .36, depth: "near" },
-  duckLight: { nameKey: "birdDuck",    svg: DUCK_LIGHT, h: 44,  by: 13, speed: 8,  z: 2, x: .10, depth: "far" },
-  sparrow:   { nameKey: "birdSparrow", svg: SPARROW,    h: 34,  by: 3,  speed: 22, z: 8, x: .27, depth: "near" },
+  crane:     { nameKey: "birdCrane",   svg: CRANE,      h: 122, by: 12, speed: 8,  z: 4, x: .16, depth: "mid" },
+  peacock:   { nameKey: "birdPeacock", svg: PEACOCK,    h: 104, by: 10, speed: 6.5,z: 5, x: .56, depth: "mid" },
+  ostrich:   { nameKey: "birdOstrich", svg: OSTRICH,    h: 134, by: 9,  speed: 7,  z: 7, x: .82, depth: "near" },
+  egret:     { nameKey: "birdEgret",   svg: EGRET,      h: 76,  by: 20, speed: 6,  z: 2, x: .64, depth: "far" },
+  duck:      { nameKey: "birdDuck",    svg: DUCK,       h: 58,  by: 10, speed: 14, z: 8, x: .36, depth: "near" },
+  duckLight: { nameKey: "birdDuck",    svg: DUCK_LIGHT, h: 44,  by: 21, speed: 8,  z: 2, x: .10, depth: "far" },
+  sparrow:   { nameKey: "birdSparrow", svg: SPARROW,    h: 34,  by: 11, speed: 22, z: 8, x: .27, depth: "near" },
 };
 
 const CAST = ["crane", "peacock", "ostrich", "egret", "duck", "duckLight", "sparrow"];
