@@ -483,7 +483,7 @@ function showToast(text){
 
 /* ---------- routing ---------- */
 const VIEWS = ["home", "explore", "almanac", "how"];
-const MODE_IDS = ["classic", "sprint", "zen", "maya"];
+const MODE_IDS = ["classic", "sprint", "zen", "maya", "altitude", "daily", "gajar", "zameen", "filmi", "doHaath"];
 function route(){
   const raw = decodeURIComponent(location.hash.replace(/^#\/?/, "")) || "home";
   const [head, sub] = raw.split("/");
@@ -537,6 +537,11 @@ function goHome(){
 /* ---------- wire up ---------- */
 function refreshBests(){
   $$("[data-best]").forEach(el => {
+    if(el.dataset.best === "daily"){
+      const t = store.dailyBest();
+      el.textContent = t > 0 ? `${(t / 10).toFixed(1)}s` : "—";
+      return;
+    }
     const v = store.best(el.dataset.best);
     el.textContent = v > 0 ? v : "—";
   });

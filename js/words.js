@@ -204,8 +204,8 @@ export const WORDS = [
     note: { en: "It falls with style, and that is the whole point.", hi: "शान से गिरता है — और यही पूरा मक़सद है।", hl: "Shaan se girta hai — aur yahi poora maksad hai." } },
   { id: "chhata", en: "Umbrella", hi: "छाता", hl: "Chhata", flies: false, cat: "object",
     note: { en: "Mary Poppins had a magic one. Yours keeps the rain off.", hi: "मैरी पॉपिंस के पास जादुई था। तुम्हारा बारिश से बचाता है।", hl: "Mary Poppins ke paas jaadui tha. Tumhara baarish se bachata hai." } },
-  { id: "upgrah", en: "Satellite", hi: "उपग्रह", hl: "Upgrah", flies: false, cat: "machine",
-    note: { en: "It falls around the Earth forever — that is orbit, not flight.", hi: "यह पृथ्वी के चारों ओर हमेशा गिरता है — यह कक्षा है, उड़ान नहीं।", hl: "Yeh prithvi ke charon or hamesha girta hai — yeh kaksha hai, udaan nahi." } },
+  { id: "upgrah", en: "Satellite", hi: "उपग्रह", hl: "Upgrah", flies: true, cat: "machine",
+    note: { en: "It doesn't flap — it rides an orbit, higher than any wing.", hi: "यह पंख नहीं फड़फड़ाता — कक्षा पर सवार है, किसी भी पंख से ऊँचा।", hl: "Yeh pankh nahi fadfadaata — orbit par sawaar hai, kisi bhi pankh se ooncha." } },
   { id: "dhoomketu", en: "Comet", hi: "धूमकेतु", hl: "Dhoomketu", flies: true, cat: "object",
     note: { en: "A ball of ice with a tail of light, crossing the night.", hi: "बर्फ़ की गेंद, रोशनी की पूँछ — रात पार करती हुई।", hl: "Barf ki gend, roshni ki poonch — raat paar karti hui." } },
   { id: "bhoot", en: "Ghost", hi: "भूत", hl: "Bhoot", flies: true, cat: "myth",
@@ -216,13 +216,66 @@ export const WORDS = [
     note: { en: "Wings, halo, and a permanent tailwind.", hi: "पंख, प्रभामंडल, और हमेशा अनुकूल हवा।", hl: "Pankh, halo, aur hamesha anukool hawa." } },
 ];
 
+/* ==========================================================================
+   Altitude — a small set of names that belong in the high sky. Everything
+   else that flies stays low; ground things never fly at all.
+   ========================================================================== */
+
+export const HIGH_FLYERS = new Set([
+  "cheel", "giddh", "baaz", "garud", "dragon", "farishta",
+  "hawai", "helicopter", "rocket", "drone", "upgrah", "dhoomketu",
+  "patang", "paraglider", "baadal", "chudail",
+]);
+
+export function altitudeOf(w){
+  return w && w.flies && HIGH_FLYERS.has(w.id) ? "high" : "low";
+}
+
+/* ==========================================================================
+   The filmi deck — a separate bag on purpose, so the 147-name almanac keeps
+   its count. Pop-culture physics, certified by the box office.
+   ========================================================================== */
+
+export const MEME_WORDS = [
+  { id: "rajinikanth", en: "Rajinikanth", hi: "रजनीकांत", hl: "Rajinikanth", flies: true, cat: "myth",
+    note: { en: "Physics files a complaint, then withdraws it.", hi: "भौतिकी शिकायत करती है, फिर वापस ले लेती है।", hl: "Physics complaint karti hai, phir wapas le leti hai." } },
+  { id: "selmon-car", en: "Selmon Bhoi's Car", hi: "सेलमन भाई की गाड़ी", hl: "Selmon Bhoi ki Gaadi", flies: true, cat: "vehicle",
+    note: { en: "In the movie it flies. In real life, please drive slowly.", hi: "फ़िल्म में गाड़ी उड़ती है। असल में, धीरे चलाओ।", hl: "Movie mein gaadi udti hai. Real life mein dheere chalao." } },
+  { id: "papa-pari", en: "Papa ki Pari", hi: "पापा की परी", hl: "Papa ki Pari", flies: true, cat: "myth",
+    note: { en: "Permanent tailwind, unlimited pocket money.", hi: "हमेशा अनुकूल हवा, बेहिसाब जेबख़र्च।", hl: "Hamesha anukool hawa, behisaab pocket money." } },
+  { id: "rishtedaar", en: "Relatives' Expectations", hi: "रिश्तेदारों की उम्मीदें", hl: "Rishtedaaron ki Ummeedein", flies: true, cat: "myth",
+    note: { en: "Skyrockets at every wedding, lands on your head.", hi: "हर शादी में आसमान छूती हैं, तुम्हारे सिर पर उतरती हैं।", hl: "Har shaadi mein aasmaan chooti hain, tumhare sir par utarti hain." } },
+  { id: "wifi", en: "Wi-Fi Signal", hi: "वाई-फ़ाई सिग्नल", hl: "Wi-Fi Signal", flies: false, cat: "object",
+    note: { en: "Drops the moment the meeting starts. Keep the finger down.", hi: "मीटिंग शुरू होते ही गिर जाता है। उँगली नीचे रखो।", hl: "Meeting shuru hote hi gir jaata hai. Ungli neeche rakho." } },
+  { id: "sharma-beta", en: "Sharma ji ka Beta", hi: "शर्मा जी का बेटा", hl: "Sharma ji ka Beta", flies: true, cat: "myth",
+    note: { en: "Always one rank above you, somehow airborne.", hi: "हमेशा तुमसे एक रैंक ऊपर, किसी तरह हवा में।", hl: "Hamesha tumse ek rank upar, kisi tarah hawa mein." } },
+  { id: "mummy-chappal", en: "Mummy ki Chappal", hi: "मम्मी की चप्पल", hl: "Mummy ki Chappal", flies: true, cat: "object",
+    note: { en: "A precision missile with a sole.", hi: "तलवे वाली सटीक मिसाइल।", hl: "Talwe wali sateek missile." } },
+  { id: "papa-belt", en: "Papa ka Belt", hi: "पापा का बेल्ट", hl: "Papa ka Belt", flies: true, cat: "object",
+    note: { en: "Historically the fastest object in the house.", hi: "घर की सबसे तेज़ चीज़, ऐतिहासिक रूप से।", hl: "Ghar ki sabse tez cheez, historically." } },
+  { id: "dhoni-heli", en: "Dhoni's Helicopter Shot", hi: "धोनी का हेलीकॉप्टर शॉट", hl: "Dhoni ka Helicopter Shot", flies: true, cat: "object",
+    note: { en: "Low follow-through, very high result.", hi: "नीचा फ़ॉलो-थ्रू, बहुत ऊँचा नतीजा।", hl: "Neecha follow-through, bahut ooncha result." } },
+  { id: "office-mail", en: "9 PM Office Email", hi: "रात 9 बजे का ऑफ़िस मेल", hl: "9 PM ka Office Mail", flies: true, cat: "object",
+    note: { en: "Lands on your head with a soft ping.", hi: "हल्की पिंग के साथ सिर पर आ गिरता है।", hl: "Halki ping ke saath sir par aa girta hai." } },
+  { id: "sunday-alarm", en: "Sunday Alarm", hi: "रविवार का अलार्म", hl: "Sunday ka Alarm", flies: false, cat: "object",
+    note: { en: "Never takes off. That is the whole point.", hi: "कभी उड़ता ही नहीं। पूरा मक़सद यही है।", hl: "Kabhi udta hi nahi. Poora maksad yahi hai." } },
+  { id: "gym-membership", en: "Gym Membership", hi: "जिम की सदस्यता", hl: "Gym Membership", flies: false, cat: "object",
+    note: { en: "Grounded since January, renewed every December.", hi: "जनवरी से ज़मीन पर, हर दिसंबर में नवीनीकृत।", hl: "January se zameen par, har December renew." } },
+  { id: "swiggy", en: "Swiggy Delivery", hi: "स्विगी डिलीवरी", hl: "Swiggy Delivery", flies: true, cat: "object",
+    note: { en: "Arrives faster than your appetite can plan.", hi: "तुम्हारी भूख के इंतज़ाम से तेज़ पहुँचती है।", hl: "Tumhari bhookh ke intezaam se tez pahunchti hai." } },
+  { id: "aunty-gossip", en: "Aunty's Gossip", hi: "आंटी की चुगली", hl: "Aunty ki Chugli", flies: true, cat: "myth",
+    note: { en: "Crosses three buildings before you finish your chai.", hi: "तुम्हारी चाय ख़त्म होने से पहले तीन इमारतें पार।", hl: "Tumhari chai khatam hone se pehle teen buildings paar." } },
+  { id: "monday", en: "Monday Morning", hi: "सोमवार की सुबह", hl: "Monday ki Subah", flies: false, cat: "object",
+    note: { en: "Heavy, grey, and utterly earthbound.", hi: "भारी, धूसर, और पूरी तरह ज़मीनी।", hl: "Bhaari, dhoosar, aur poori tarah zameeni." } },
+];
+
 /** Pick a shuffled bag so names don't repeat until the bag empties. */
-export function makeBag(){
+export function makeBag(source = WORDS){
   let bag = [];
   return {
     next(exclude = []){
       if(!bag.length){
-        bag = WORDS.slice();
+        bag = source.slice();
         for(let i = bag.length - 1; i > 0; i--){
           const j = Math.floor(Math.random() * (i + 1));
           [bag[i], bag[j]] = [bag[j], bag[i]];

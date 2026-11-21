@@ -12,22 +12,35 @@ const defaults = {
   pace: "normal",
   camera: 0,
   mode: "classic",
-  best: { classic: 0, sprint: 0, zen: 0, maya: 0 },
+  best: {
+    classic: 0, sprint: 0, zen: 0, maya: 0,
+    altitude: 0, daily: 0, gajar: 0, zameen: 0, filmi: 0, doHaath: 0,
+  },
+  daily: {},
   plays: 0,
 };
+
+/** The local date key used by the Rapid Fire ladder: YYYY-MM-DD. */
+export function dayKey(date = new Date()){
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
 function read(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(!raw) return { ...defaults, best: { ...defaults.best } };
+    if(!raw) return { ...defaults, best: { ...defaults.best }, daily: {} };
     const parsed = JSON.parse(raw);
     return {
       ...defaults,
       ...parsed,
       best: { ...defaults.best, ...(parsed.best || {}) },
+      daily: { ...(parsed.daily || {}) },
     };
   }catch{
-    return { ...defaults, best: { ...defaults.best } };
+    return { ...defaults, best: { ...defaults.best }, daily: {} };
   }
 }
 
@@ -44,6 +57,21 @@ export const store = {
   setBest(mode, score){
     const prev = this.best(mode);
     if(score > prev){ state.best[mode] = score; save(); return true; }
+    return false;
+  },
+  /** Rapid Fire is remembered per calendar day, in tenths of a second. */
+  dailyBest(key = dayKey()){
+    return Number((state.daily && state.daily[key]) || 0);
+  },
+  setDailyBest(key, tenths){
+    if(!state.daily) state.daily = {};
+    const prev = Number(state.daily[key] || 0);
+    if(tenths > prev){
+      state.daily[key] = tenths;
+      if(tenths > this.best("daily")) state.best.daily = tenths;
+      save();
+      return true;
+    }
     return false;
   },
   bumpPlay(){ state.plays = (state.plays || 0) + 1; save(); },

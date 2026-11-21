@@ -108,6 +108,7 @@
   <div class="meadow-ridge ridge-mid"></div>
   <div class="meadow-mist mist-b"></div>
   <div class="meadow-far" id="meadowFar"></div>
+  <div class="meadow-village" id="meadowVillage"></div>
   <div class="meadow-birds" id="meadowBirds"></div>
   <div class="meadow-ridge ridge-near"></div>
   <div class="meadow-grass" id="meadowGrass"></div>
@@ -208,7 +209,7 @@
           <a class="btn btn-ghost" href="#how" data-i18n="heroCta2">How it's played</a>
         </div>
         <ul class="hero-facts reveal" style="--d:.24s">
-          <li><strong>4</strong> <span data-i18n="factModes">ways to play</span></li>
+          <li><strong>10</strong> <span data-i18n="factModes">ways to play</span></li>
           <li><strong id="factWords">118</strong> <span data-i18n="factNames">names</span></li>
           <li><strong>3</strong> <span data-i18n="factLangs">tongues</span></li>
         </ul>
@@ -301,6 +302,96 @@
         <p data-i18n="modeMayaDesc">A 3D vision floats beside every name — and sometimes it lies. Trust the name, not the picture.</p>
         <div class="mode-meta"><span data-i18n="visionShort">3D</span><span data-i18n="withTricks">with tricks</span></div>
         <button class="mode-play" type="button" data-play-mode="maya">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="altitude" style="--accent:#f0b45a">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-falcon"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-falcon"/></svg></span>
+          <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="altitude">—</b></span>
+        </div>
+        <h3 data-i18n="modeAltitude">Oonchai</h3>
+        <p class="mode-theme-line" data-i18n="themeAltitude">High sky court</p>
+        <p data-i18n="modeAltitudeDesc">High sky, low sky. Tap lightly for butterflies and hens; swipe up hard for eagles, rockets and satellites.</p>
+        <div class="mode-meta"><span>↑</span><span data-i18n="pickAltitudeMeta">tap low · swipe high</span></div>
+        <button class="mode-play" type="button" data-play-mode="altitude">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="daily" style="--accent:#ff9a5a">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-falcon"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-bolt"/></svg></span>
+          <span class="mode-best"><span data-i18n="dailyBestToday">Today's best</span> <b data-best="daily">—</b></span>
+        </div>
+        <h3 data-i18n="modeDaily">Rapid Fire</h3>
+        <p class="mode-theme-line" data-i18n="themeDaily">Daily rocket court</p>
+        <p data-i18n="modeDailyDesc">Thirty seconds, one shared daily sequence, hyper-speed. One false lift ends the run.</p>
+        <div class="mode-meta"><span>30s</span><span data-i18n="pickDailyMeta">30s daily · one life</span></div>
+        <button class="mode-play" type="button" data-play-mode="daily">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="gajar" style="--accent:#d98c5f">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-hummingbird"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-hummingbird"/></svg></span>
+          <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="gajar">—</b></span>
+        </div>
+        <h3 data-i18n="modeGajar">Gajar-Muli</h3>
+        <p class="mode-theme-line" data-i18n="themeGajar">Wobbly rhythm court</p>
+        <p data-i18n="modeGajarDesc">The caller keeps changing the rhythm — rushed, stretched, whispered, paused. Never trust your muscle memory.</p>
+        <div class="mode-meta"><span>~</span><span data-i18n="pickGajarMeta">shifting rhythm</span></div>
+        <button class="mode-play" type="button" data-play-mode="gajar">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="zameen" style="--accent:#7fc8a9">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-penguin"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-leaf"/></svg></span>
+          <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="zameen">—</b></span>
+        </div>
+        <h3 data-i18n="modeZameen">Zameen</h3>
+        <p class="mode-theme-line" data-i18n="themeZameen">Upside-down court</p>
+        <p data-i18n="modeZameenDesc">Every ten seconds the world turns over: keep the finger down for flyers, lift it for ground things.</p>
+        <div class="mode-meta"><span>10s</span><span data-i18n="pickZameenMeta">rule flips every 10s</span></div>
+        <button class="mode-play" type="button" data-play-mode="zameen">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="filmi" style="--accent:#f0708c">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-peacock"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-spark"/></svg></span>
+          <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="filmi">—</b></span>
+        </div>
+        <h3 data-i18n="modeFilmi">Filmi</h3>
+        <p class="mode-theme-line" data-i18n="themeFilmi">Matinee court</p>
+        <p data-i18n="modeFilmiDesc">The comedy deck. Rajinikanth, Papa ki Pari and Relatives' Expectations fly. Wi-Fi drops — don't lift.</p>
+        <div class="mode-meta"><span>★</span><span data-i18n="pickFilmiMeta">meme deck</span></div>
+        <button class="mode-play" type="button" data-play-mode="filmi">
+          <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
+        </button>
+      </article>
+
+      <article class="mode-card" data-mode="doHaath" style="--accent:#8bb7f0">
+        <span class="mode-bird" aria-hidden="true"><svg viewBox="0 0 64 64"><use href="#i-crane"/></svg></span>
+        <div class="mode-top">
+          <span class="mode-icon"><svg><use href="#i-hand"/></svg></span>
+          <span class="mode-best"><span data-i18n="best">Best</span> <b data-best="doHaath">—</b></span>
+        </div>
+        <h3 data-i18n="modeDoHaath">Do Haath</h3>
+        <p class="mode-theme-line" data-i18n="themeDoHaath">Two-hand court</p>
+        <p data-i18n="modeDoHaathDesc">Two thumbs, two columns. Lift only the side whose object flies — both, when both fly.</p>
+        <div class="mode-meta"><span>2</span><span data-i18n="pickDoHaathMeta">two thumbs</span></div>
+        <button class="mode-play" type="button" data-play-mode="doHaath">
           <span data-i18n="playNow">Play</span><svg><use href="#i-play"/></svg>
         </button>
       </article>
@@ -567,6 +658,15 @@
 
   <div class="play-speed" aria-hidden="true"><span id="speedBar"></span></div>
 
+  <div class="zameen-banner" id="zameenBanner" hidden aria-live="polite">
+    <b id="zameenTitle">Aasmaan</b>
+    <span id="zameenSub"></span>
+    <i id="zameenClock"></i>
+  </div>
+  <div class="daily-chip" id="dailyChip" hidden>
+    <span>Rapid Fire</span><b id="dailySeedLabel"></b>
+  </div>
+
   <div class="play-stage">
     <div class="call" id="call">
       <div class="call-flock" id="callFlock" aria-hidden="true"></div>
@@ -585,6 +685,14 @@
       </div>
       <div class="call-meter" aria-hidden="true"><span id="callMeter"></span></div>
     </div>
+
+    <div class="alt-rail" id="altRail" hidden aria-hidden="true">
+      <span class="alt-cap" data-i18n="altitudeTap">small lift</span>
+      <div class="alt-track"><span id="altFill"></span><i class="alt-notch"></i></div>
+      <span class="alt-cap" data-i18n="altitudeSwipe">swipe up</span>
+    </div>
+
+    <div class="chant-strip" id="chantStrip" hidden aria-hidden="true"></div>
 
     <div class="palm-zone">
       <div class="npc-roster" id="npcRoster"></div>
@@ -608,6 +716,34 @@
         <div class="whacks" id="whacks" aria-hidden="true"></div>
       </div>
       <p class="palm-help" data-i18n="palmHelp">tap to lift · rest to stay</p>
+    </div>
+
+    <div class="duel-stage" id="duelStage" hidden>
+      <div class="duel-head">
+        <b data-i18n="duelTitle">Do Haath</b>
+        <span id="duelRound"></span>
+      </div>
+      <div class="duel-cols">
+        <div class="duel-side" id="duelSideL" data-side="left">
+          <span class="duel-side-tag" data-i18n="duelLeft">Left</span>
+          <div class="duel-word" id="duelWordL"></div>
+          <div class="duel-sub" id="duelSubL"></div>
+          <button class="duel-pad" id="duelPadL" type="button" aria-label="Lift the left thumb">
+            <span class="duel-thumb" aria-hidden="true"></span>
+            <span class="duel-state" id="duelStateL" data-i18n="duelDown">thumb down</span>
+          </button>
+        </div>
+        <div class="duel-side" id="duelSideR" data-side="right">
+          <span class="duel-side-tag" data-i18n="duelRight">Right</span>
+          <div class="duel-word" id="duelWordR"></div>
+          <div class="duel-sub" id="duelSubR"></div>
+          <button class="duel-pad" id="duelPadR" type="button" aria-label="Lift the right thumb">
+            <span class="duel-thumb" aria-hidden="true"></span>
+            <span class="duel-state" id="duelStateR" data-i18n="duelDown">thumb down</span>
+          </button>
+        </div>
+      </div>
+      <p class="duel-hint" data-i18n="duelHint">Lift only the side that flies</p>
     </div>
   </div>
 
@@ -644,6 +780,42 @@
           <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="maya">—</b></span>
           <svg class="pick-arrow"><use href="#i-arrow"/></svg>
         </button>
+        <button class="pick-card" type="button" data-pick-mode="altitude" style="--accent:#f0b45a">
+          <span class="pick-icon"><svg><use href="#i-falcon"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeAltitude">Oonchai</strong><em data-i18n="pickAltitudeMeta">tap low · swipe high</em></span>
+          <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="altitude">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
+        <button class="pick-card" type="button" data-pick-mode="daily" style="--accent:#ff9a5a">
+          <span class="pick-icon"><svg><use href="#i-bolt"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeDaily">Rapid Fire</strong><em data-i18n="pickDailyMeta">30s daily · one life</em></span>
+          <span class="pick-best"><span data-i18n="dailyBestToday">Today's best</span> <b data-best="daily">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
+        <button class="pick-card" type="button" data-pick-mode="gajar" style="--accent:#d98c5f">
+          <span class="pick-icon"><svg><use href="#i-hummingbird"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeGajar">Gajar-Muli</strong><em data-i18n="pickGajarMeta">shifting rhythm</em></span>
+          <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="gajar">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
+        <button class="pick-card" type="button" data-pick-mode="zameen" style="--accent:#7fc8a9">
+          <span class="pick-icon"><svg><use href="#i-leaf"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeZameen">Zameen</strong><em data-i18n="pickZameenMeta">rule flips every 10s</em></span>
+          <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="zameen">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
+        <button class="pick-card" type="button" data-pick-mode="filmi" style="--accent:#f0708c">
+          <span class="pick-icon"><svg><use href="#i-spark"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeFilmi">Filmi</strong><em data-i18n="pickFilmiMeta">meme deck</em></span>
+          <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="filmi">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
+        <button class="pick-card" type="button" data-pick-mode="doHaath" style="--accent:#8bb7f0">
+          <span class="pick-icon"><svg><use href="#i-hand"/></svg></span>
+          <span class="pick-copy"><strong data-i18n="modeDoHaath">Do Haath</strong><em data-i18n="pickDoHaathMeta">two thumbs</em></span>
+          <span class="pick-best"><span data-i18n="best">Best</span> <b data-best="doHaath">—</b></span>
+          <svg class="pick-arrow"><use href="#i-arrow"/></svg>
+        </button>
       </div>
       <button class="text-link center" id="pickBack" type="button" data-i18n="pickBack">Back to the courtyard</button>
     </div>
@@ -655,7 +827,8 @@
       <p class="eyebrow" id="introKicker"><span class="dot"></span><span data-i18n="getReady">Get ready</span></p>
       <h2 id="introTitle">Baithak</h2>
       <p id="introDesc"></p>
-      <div class="intro-steps">
+      <p class="mode-brief" id="modeBrief" hidden></p>
+      <div class="intro-steps" id="introSteps">
         <div><span>1</span><p data-i18n="introS1">Rest your finger on the palm.</p></div>
         <div><span>2</span><p data-i18n="introS2">If the name can fly, lift it.</p></div>
         <div><span>3</span><p data-i18n="introS3">If it can't, keep it down.</p></div>
@@ -722,6 +895,16 @@
         <div><span data-i18n="best">Best</span><b id="overBest">0</b></div>
         <div><span data-i18n="accuracy">Accuracy</span><b id="overAcc">0%</b></div>
         <div><span data-i18n="bestStreak">Best streak</span><b id="overStreak">0</b></div>
+      </div>
+      <div class="daily-board" id="dailyBoard" hidden>
+        <div class="daily-media">
+          <span data-i18n="dailySurvived">Survived</span>
+          <b id="overSurvived">0.0s</b>
+          <em id="overDailyNote"></em>
+        </div>
+        <h3 data-i18n="dailyLadder">Today's ladder</h3>
+        <ol id="dailyLadderList"></ol>
+        <p class="daily-note" data-i18n="dailyNote">Rivals are paced by the day's seed. Your best line stays on this device.</p>
       </div>
       <div class="over-misses" id="overMisses"></div>
       <div class="sheet-actions">

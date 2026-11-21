@@ -294,6 +294,31 @@ export class Sound {
     this.pluck(freq, ctx.currentTime + 0.01, 0.13, 2.1, this.sfxBus);
   }
 
+  /** The caller's voice for Gajar-Muli. Cadence and pitch change every name. */
+  speak(text, lang = "en", opts = {}){
+    if(!this.sfxOn || !text) return;
+    try{
+      const synth = window.speechSynthesis;
+      const Utter = window.SpeechSynthesisUtterance;
+      if(!synth || typeof Utter !== "function") return;
+      synth.cancel();
+      const u = new Utter(String(text));
+      u.lang = lang === "en" ? "en-IN" : "hi-IN";
+      u.rate = Math.max(0.55, Math.min(1.8, opts.rate || 1));
+      u.pitch = Math.max(0.4, Math.min(1.8, opts.pitch || 1));
+      u.volume = 0.92;
+      const voices = synth.getVoices ? synth.getVoices() : [];
+      const wanted = voices.find(v => (v.lang || "").toLowerCase().startsWith(lang === "en" ? "en-in" : "hi"));
+      const fallback = voices.find(v => (v.lang || "").toLowerCase().startsWith(lang === "en" ? "en" : "hi"));
+      if(wanted || fallback) u.voice = wanted || fallback;
+      synth.speak(u);
+    }catch{ /* speech is a garnish, never a requirement */ }
+  }
+
+  stopSpeech(){
+    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch{ /* no synthesis */ }
+  }
+
   /* ---------- effects ---------- */
   fx(kind){
     const ctx = this.ensure();
@@ -305,6 +330,15 @@ export class Sound {
       case "lift":
         this._sweep(t, 380, 900, 0.28, 0.06);
         this._click(t, 0.05, 2000);
+        break;
+      case "swipe":
+        this._sweep(t, 260, 1680, 0.34, 0.07);
+        this._sweep(t + 0.07, 420, 2100, 0.26, 0.04);
+        this._click(t, 0.05, 2400);
+        break;
+      case "flip":
+        this._sweep(t, 900, 240, 0.42, 0.055, true);
+        this._blip(t + 0.2, 150, 0.08, 0.24);
         break;
       case "settle":
         this._blip(t, 210, 0.09, 0.18);

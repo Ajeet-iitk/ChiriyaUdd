@@ -246,6 +246,27 @@ const FAR_BIRD = `
   <path d="M2 14c8-2 13-6 18-12 5 6 10 10 18 12-7 1-12 3-18 4-6-1-11-3-18-4z"/>
 </svg>`;
 
+const VILLAGE_HOUSE = `
+<svg viewBox="0 0 90 78" aria-hidden="true">
+  <path class="vh-smoke" d="M63 28c-4-5 4-8 0-14 5 4 1 8 5 12"/>
+  <rect class="vh-roof" x="60" y="16" width="9" height="16" rx="1"/>
+  <rect class="vh-wall" x="18" y="36" width="54" height="40" rx="2"/>
+  <path class="vh-roof" d="M5 38 45 8l40 30z"/>
+  <rect class="vh-door" x="38" y="52" width="14" height="24" rx="2"/>
+  <rect class="vh-window" x="24" y="46" width="10" height="10" rx="1"/>
+  <rect class="vh-window" x="56" y="46" width="10" height="10" rx="1"/>
+  <path class="vh-smoke" d="M28 22c3-4-2-6 1-10" opacity=".45"/>
+</svg>`;
+
+const VILLAGE_TREE = `
+<svg viewBox="0 0 70 100" aria-hidden="true">
+  <rect class="vt-trunk" x="31" y="56" width="8" height="44" rx="4"/>
+  <ellipse class="vt-leaf" cx="35" cy="44" rx="29" ry="31"/>
+  <ellipse class="vt-leaf-2" cx="21" cy="35" rx="18" ry="21"/>
+  <ellipse class="vt-leaf-2" cx="49" cy="32" rx="17" ry="20"/>
+  <ellipse class="vt-leaf-2" cx="35" cy="18" rx="15" ry="16"/>
+</svg>`;
+
 const TYPES = {
   crane:     { nameKey: "birdCrane",   svg: CRANE,      h: 122, by: 12, speed: 8,  z: 4, x: .16, depth: "mid" },
   peacock:   { nameKey: "birdPeacock", svg: PEACOCK,    h: 104, by: 10, speed: 6.5,z: 5, x: .56, depth: "mid" },
@@ -266,6 +287,7 @@ export class Meadow {
     this.layer = document.getElementById("meadowBirds");
     this.grainLayer = document.getElementById("meadowGrain");
     this.farLayer = document.getElementById("meadowFar");
+    this.villageLayer = document.getElementById("meadowVillage");
     this.grassLayer = document.getElementById("meadowGrass");
     this.moteLayer = document.getElementById("meadowMotes");
     this.host = document.getElementById("meadow");
@@ -324,6 +346,7 @@ export class Meadow {
     });
 
     this._buildFar();
+    this._buildVillage();
     this._buildGrass();
     this._buildMotes();
 
@@ -368,6 +391,51 @@ export class Meadow {
       el.innerHTML = FAR_BIRD;
       this.farLayer.append(el);
     }
+  }
+
+  /** Houses and trees on the far bank — the courtyard should feel lived in. */
+  _buildVillage(){
+    if(!this.villageLayer || this.villageLayer.childElementCount) return;
+    const houses = [
+      { x: 5,  b: 5, w: "clamp(42px,5.6vw,82px)",  o: .82 },
+      { x: 19, b: 1, w: "clamp(34px,4.4vw,66px)",  o: .64 },
+      { x: 43, b: 7, w: "clamp(38px,5vw,74px)",    o: .74 },
+      { x: 60, b: 2, w: "clamp(46px,6vw,90px)",    o: .8 },
+      { x: 81, b: 8, w: "clamp(36px,4.6vw,70px)",  o: .58 },
+    ];
+    houses.forEach((h, i) => {
+      const el = document.createElement("span");
+      el.className = "village-house";
+      el.style.setProperty("--vx", `${h.x}%`);
+      el.style.setProperty("--vb", `${h.b}%`);
+      el.style.setProperty("--vw", h.w);
+      el.style.setProperty("--vo", String(h.o));
+      el.style.zIndex = String(2 + (i % 2));
+      el.innerHTML = VILLAGE_HOUSE;
+      this.villageLayer.append(el);
+    });
+
+    const trees = [
+      { x: -1, b: 4, w: "clamp(54px,7.4vw,112px)", o: .8 },
+      { x: 12, b: 0, w: "clamp(42px,5.8vw,88px)",  o: .62 },
+      { x: 28, b: 6, w: "clamp(50px,6.8vw,104px)", o: .72 },
+      { x: 37, b: -1,w: "clamp(38px,5vw,78px)",    o: .55 },
+      { x: 53, b: 3, w: "clamp(58px,8vw,122px)",   o: .78 },
+      { x: 71, b: -2,w: "clamp(44px,6vw,92px)",    o: .6 },
+      { x: 89, b: 5, w: "clamp(52px,7vw,108px)",   o: .68 },
+    ];
+    trees.forEach((t, i) => {
+      const el = document.createElement("span");
+      el.className = "village-tree";
+      el.style.setProperty("--vx", `${t.x}%`);
+      el.style.setProperty("--vb", `${t.b}%`);
+      el.style.setProperty("--vw", t.w);
+      el.style.setProperty("--vo", String(t.o));
+      el.style.setProperty("--vd", `${(-rnd(0, 5)).toFixed(2)}s`);
+      el.style.zIndex = String(i % 2 ? 1 : 3);
+      el.innerHTML = VILLAGE_TREE;
+      this.villageLayer.append(el);
+    });
   }
 
   _buildGrass(){
